@@ -1528,3 +1528,257 @@ td strong { color: var(--text); }
   .number-grid { grid-template-columns: repeat(4, 1fr); }
   .grid-number { height: 44px; font-size: 0.78rem; }
 }
+
+/* ════════════════════════════════════════════
+   SPRINT 1 — MODALES Y FEATURES
+   ════════════════════════════════════════════ */
+
+/* ── Modal overlay ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Modal box ── */
+.modal-box {
+  background: var(--bg-2);
+  border: 1px solid var(--border-hi);
+  border-radius: var(--r-xl);
+  padding: 32px 28px 28px;
+  max-width: 580px;
+  width: 100%;
+  position: relative;
+  animation: modalIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(24px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+.modal-title {
+  font-family: "Unbounded", sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--glass-md);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-size: 0.9rem;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all var(--t);
+  z-index: 2;
+}
+
+.modal-close:hover {
+  background: var(--glass-hi);
+  color: var(--text);
+  transform: scale(1.1);
+}
+
+/* ════ WINNER MODAL ════ */
+.winner-modal { text-align: center; overflow: hidden; }
+
+/* Drum stage */
+.drum-stage {
+  position: relative;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+/* Decorative balls */
+.drum-balls-ring {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.drum-ball {
+  position: absolute;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: "Unbounded", sans-serif;
+  font-weight: 900;
+  font-size: 0.8rem;
+  background: radial-gradient(circle at 32% 28%, #fff9a0, var(--gold));
+  color: #1a0d00;
+  box-shadow: 0 6px 20px rgba(255, 214, 10, 0.35);
+  transition: all 0.1s;
+}
+
+.drum-ball:nth-child(1) { top:  8px;  left: 12px; }
+.drum-ball:nth-child(2) { top:  8px;  right: 12px; }
+.drum-ball:nth-child(3) { bottom: 36px; left:  6px; }
+.drum-ball:nth-child(4) { bottom: 16px; right:  6px; }
+
+.drum-ball:nth-child(2) { animation-delay: 0.05s; }
+.drum-ball:nth-child(3) { animation-delay: 0.1s;  }
+.drum-ball:nth-child(4) { animation-delay: 0.15s; }
+
+.drum-ball.orbiting { animation: ballBounce 0.18s ease-in-out infinite alternate; }
+
+@keyframes ballBounce {
+  from { transform: translateY(0) rotate(-6deg); }
+  to   { transform: translateY(-9px) rotate(6deg); }
+}
+
+/* Central display */
+.drum-display {
+  font-family: "Unbounded", sans-serif;
+  font-size: clamp(3.5rem, 8vw, 5rem);
+  font-weight: 900;
+  color: var(--gold);
+  text-shadow: 0 0 40px rgba(255, 214, 10, 0.5);
+  padding: 18px 42px;
+  border-radius: 20px;
+  background: rgba(255, 214, 10, 0.07);
+  border: 2px solid rgba(255, 214, 10, 0.2);
+  min-width: 190px;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  transition: text-shadow 0.3s, background 0.3s, border-color 0.3s;
+  letter-spacing: 0.04em;
+}
+
+.drum-display.spinning {
+  animation: drumFlicker 0.11s steps(1) infinite;
+}
+
+@keyframes drumFlicker {
+  0%  { border-color: rgba(255, 214, 10, 0.12); }
+  50% { border-color: rgba(255, 214, 10, 0.5); }
+}
+
+.drum-display.winner-display {
+  text-shadow: 0 0 60px rgba(255, 214, 10, 1), 0 0 120px rgba(255, 214, 10, 0.5);
+  border-color: var(--gold);
+  background: rgba(255, 214, 10, 0.14);
+  animation: winnerPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes winnerPop {
+  0%   { transform: scale(0.75); opacity: 0.2; }
+  65%  { transform: scale(1.1); }
+  100% { transform: scale(1);   opacity: 1; }
+}
+
+/* Winner reveal */
+.winner-reveal {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.winner-reveal.show {
+  display: flex;
+  animation: fadeSlideUp 0.4s ease both;
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.winner-trophy { font-size: 2.2rem; }
+
+.winner-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-3);
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.winner-person {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* Drum controls */
+.drum-controls {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Confetti */
+.confetti-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: var(--r-xl);
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -12px;
+  animation: confettiFall linear forwards;
+  opacity: 0.92;
+}
+
+@keyframes confettiFall {
+  0%   { transform: translateY(0) rotate(0deg)   scaleX(1);  opacity: 1; }
+  80%  { opacity: 0.8; }
+  100% { transform: translateY(680px) rotate(540deg) scaleX(-1); opacity: 0; }
+}
+
+/* ════ TICKET MODAL ════ */
+.ticket-modal { max-width: 860px; }
+
+.ticket-canvas {
+  width: 100%;
+  aspect-ratio: 800 / 450;
+  display: block;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+
+.ticket-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
