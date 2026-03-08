@@ -1997,3 +1997,34 @@ td strong { color: var(--text); }
   .viral-btns > *   { flex: 1; justify-content: center; }
   .sold-head        { flex-direction: column; gap: 4px; }
 }
+
+/* ══════════════════════════════════════════════
+   SPRINT 3B — Toast notification
+   ══════════════════════════════════════════════ */
+.rifa-toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: rgba(15, 22, 36, 0.92);
+  border: 1px solid var(--border-hi);
+  padding: 13px 24px;
+  border-radius: 999px;
+  color: var(--ink);
+  font-size: 0.875rem;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 500;
+  backdrop-filter: blur(14px);
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.28s ease, transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+}
+.rifa-toast--visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.rifa-toast--success { border-color: rgba(0,229,115,0.45); }
+.rifa-toast--error   { border-color: rgba(251,146,60,0.45); }

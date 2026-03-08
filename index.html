@@ -450,9 +450,9 @@
             </div>
             <div class="sold-footer">
               <div class="sold-legend">
-                <span><i class="dot-paid"></i> Pagados: 68</span>
-                <span><i class="dot-reserved"></i> Apartados: 12</span>
-                <span><i class="dot-available"></i> Libres: 20</span>
+                <span id="legendPaid"><i class="dot-paid"></i> Pagados: 68</span>
+                <span id="legendReserved"><i class="dot-reserved"></i> Apartados: 12</span>
+                <span id="legendAvailable"><i class="dot-available"></i> Libres: 20</span>
               </div>
               <span class="sold-alert" id="soldAlert"></span>
             </div>
@@ -505,7 +505,7 @@
                   Números elegidos
                   <input type="text" value="08, 12, 24" />
                 </label>
-                <button type="button" class="primary-btn glow-btn full">Apartar ahora 🎉</button>
+                <button type="button" class="primary-btn glow-btn full" id="btnApartar">Apartar ahora 🎉</button>
                 <button type="button" class="ghost-btn full" id="btnTicket">🎟️ Generar ticket para WhatsApp</button>
               </form>
             </div>
@@ -535,21 +535,22 @@
             <div style="display:flex;gap:10px;flex-wrap:wrap;">
               <button class="ghost-btn" id="btnExportCSV">📤 Exportar CSV</button>
               <button class="ghost-btn">📋 Copiar link</button>
+              <button class="ghost-btn" id="btnResetDemo" style="color:var(--amber)">🗑️ Limpiar datos</button>
             </div>
           </div>
 
           <div class="manage-stats">
             <div class="stat-card">
               <p class="stat-label">Disponibles</p>
-              <p class="stat-val green">20</p>
+              <p class="stat-val green" id="statDisp">20</p>
             </div>
             <div class="stat-card">
               <p class="stat-label">Apartados</p>
-              <p class="stat-val amber">12</p>
+              <p class="stat-val amber" id="statApart">12</p>
             </div>
             <div class="stat-card">
               <p class="stat-label">Pagados</p>
-              <p class="stat-val gold">68</p>
+              <p class="stat-val gold" id="statPagados">68</p>
             </div>
           </div>
 
@@ -565,28 +566,8 @@
                     <th>Acción</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr>
-                    <td><strong>08</strong></td>
-                    <td>Maria Rojas</td>
-                    <td>3150001111</td>
-                    <td><span class="pill-soon">⏳ Apartado</span></td>
-                    <td><button class="action-btn green-btn">Marcar pagado</button></td>
-                  </tr>
-                  <tr>
-                    <td><strong>12</strong></td>
-                    <td>Carlos Vega</td>
-                    <td>3160002222</td>
-                    <td><span class="pill-live">✅ Pagado</span></td>
-                    <td><button class="action-btn gray-btn">Liberar</button></td>
-                  </tr>
-                  <tr>
-                    <td><strong>24</strong></td>
-                    <td>Luisa Gómez</td>
-                    <td>3170003333</td>
-                    <td><span class="pill-soon">⏳ Apartado</span></td>
-                    <td><button class="action-btn green-btn">Marcar pagado</button></td>
-                  </tr>
+                <tbody id="gestionarTbody">
+                  <!-- Renderizado dinámico desde JS (Sprint 3B) -->
                 </tbody>
               </table>
             </div>
