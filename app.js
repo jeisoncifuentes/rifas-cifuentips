@@ -33,8 +33,13 @@ function switchView(target) {
   // Generar grilla de números al entrar a la vista pública
   if (target === "publica") {
     buildNumberGrid();
-    initCountdown();    // ← Sprint 2
-    animateProgress(); // ← Sprint 2
+    initCountdown();        // Sprint 2
+    animateProgress();      // Sprint 2 (también actualiza leyenda dinámica)
+  }
+  // Actualizar tabla y contadores al entrar a gestionar
+  if (target === "gestionar") {
+    renderGestionar();
+    updateManageStats();
   }
 }
 
@@ -72,7 +77,8 @@ function buildNumberGrid() {
 
   for (let i = 0; i <= 99; i++) {
     const num = String(i).padStart(2, "0");
-    const state = PRESET[num] || "available";
+    // Sprint 3B: usa numberStates cargados desde localStorage si existen
+    const state = numberStates[num] || PRESET[num] || "available";
     numberStates[num] = state;
 
     const btn = document.createElement("button");
@@ -119,15 +125,14 @@ function syncSelectedInput() {
   if (input) input.value = selected || "";
 }
 
-// ── Entrada inicial ──
-buildNumberGrid();
+// ── Entrada inicial — gestionada por initApp() al final del archivo ──
 
 /* ══════════════════════════════════════════════
    SPRINT 1 — FEATURES DE ALTO IMPACTO
    ══════════════════════════════════════════════ */
 
 // ── Datos demo de compradores ──
-const BUYERS = [
+const DEMO_BUYERS = [
   { num: "08", nombre: "Maria Rojas",     cel: "3150001111", estado: "Apartado" },
   { num: "12", nombre: "Carlos Vega",     cel: "3160002222", estado: "Pagado"   },
   { num: "24", nombre: "Luisa Gómez",     cel: "3170003333", estado: "Apartado" },
@@ -138,6 +143,7 @@ const BUYERS = [
   { num: "22", nombre: "Luis García",     cel: "3220008888", estado: "Pagado"   },
   { num: "26", nombre: "Clara Torres",    cel: "3230009999", estado: "Pagado"   },
 ];
+let BUYERS = DEMO_BUYERS.map(b => ({ ...b })); // array mutable (Sprint 3B)
 
 // ════════════════════════════
 // FEATURE 3: Exportar CSV
@@ -558,10 +564,13 @@ function animateProgress() {
   // Reiniciar si ya estaba corriendo
   if (_progTimer) { clearInterval(_progTimer); _progTimer = null; }
 
-  const PAID     = 68;
-  const RESERVED = 12;
+  // Sprint 3B: valores dinámicos desde BUYERS
+  const PAID     = BUYERS.filter(b => b.estado === "Pagado").length;
+  const RESERVED = BUYERS.filter(b => b.estado === "Apartado").length;
   const TOTAL    = 100;
   const TARGET   = PAID; // la barra muestra solo pagados; apartados se ven en leyenda
+
+  updateProgressLegend(); // Sprint 3B: actualizar leyenda con datos reales
 
   // Reset visual instantáneo
   const fillEl  = document.getElementById("soldFill");
@@ -612,12 +621,13 @@ function animateProgress() {
 // FEATURE: Viral share
 // ════════════════════════════
 function shareRifa() {
+  const paid = BUYERS.filter(b => b.estado === "Pagado").length; // Sprint 3B: dinámico
   const msg =
     `🎉 *¡Rifas Cifuentips!*\n\n` +
     `🏆 Premio: *Freidora de aire Oster*\n` +
     `💰 Solo *$10.000 COP* por número\n` +
     `📅 Sorteo: *20 de abril de 2026*\n` +
-    `⚡ ¡Ya van 68/100 vendidos!\n\n` +
+    `⚡ ¡Ya van ${paid}/100 vendidos!\n\n` +
     `Corre a apartar tu número antes de que se agoten 👇`;
   window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
 }
@@ -656,3 +666,234 @@ document.getElementById("btnShareRifa")
   ?.addEventListener("click", shareRifa);
 document.getElementById("btnCopyRifaLink")
   ?.addEventListener("click", copyRifaLink);
+
+/* ══════════════════════════════════════════════
+   SPRINT 3B — PERSISTENCIA localStorage
+   ══════════════════════════════════════════════ */
+
+const STORAGE_KEY = "rifas-cifuentips-v1";
+
+// ════════════════════════════
+// Guardar / Cargar estado
+// ════════════════════════════
+function saveState() {
+  try {
+    // "selected" es estado UI temporal — se guarda como "available"
+    const ns = {};
+    for (const [k, v] of Object.entries(numberStates)) {
+      ns[k] = v === "selected" ? "available" : v;
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ buyers: BUYERS, numberStates: ns }));
+  } catch (e) { console.warn("saveState:", e); }
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+// ════════════════════════════
+// Reconstruir grilla (fuerza rebuild con estado actual)
+// ════════════════════════════
+function rebuildNumberGrid() {
+  const grid = document.getElementById("numberGrid");
+  if (grid) { grid.innerHTML = ""; delete grid.dataset.built; }
+  buildNumberGrid();
+}
+
+// ════════════════════════════
+// Tabla de compradores dinámica
+// ════════════════════════════
+function renderGestionar() {
+  const tbody = document.getElementById("gestionarTbody");
+  if (!tbody) return;
+
+  if (BUYERS.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-3)">
+      Sin compradores aún — los números se apartan desde la <em>vista pública</em>.
+    </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = [...BUYERS]
+    .sort((a, b) => Number(a.num) - Number(b.num))
+    .map(b => {
+      const isApart = b.estado === "Apartado";
+      const pill = isApart
+        ? `<span class="pill-soon">⏳ Apartado</span>`
+        : `<span class="pill-live">✅ Pagado</span>`;
+      const btn = isApart
+        ? `<button class="action-btn green-btn" data-num="${b.num}" data-action="pagar">Marcar pagado</button>`
+        : `<button class="action-btn gray-btn"  data-num="${b.num}" data-action="liberar">Liberar</button>`;
+      return `<tr>
+        <td><strong>${b.num}</strong></td>
+        <td>${b.nombre}</td>
+        <td>${b.cel}</td>
+        <td>${pill}</td>
+        <td>${btn}</td>
+      </tr>`;
+    }).join("");
+}
+
+// ════════════════════════════
+// Contadores de gestionar
+// ════════════════════════════
+function updateManageStats() {
+  const paid  = BUYERS.filter(b => b.estado === "Pagado").length;
+  const apart = BUYERS.filter(b => b.estado === "Apartado").length;
+  const disp  = Math.max(0, 100 - BUYERS.length);
+  const $     = id => document.getElementById(id);
+  if ($("statDisp"))    $("statDisp").textContent    = disp;
+  if ($("statApart"))   $("statApart").textContent   = apart;
+  if ($("statPagados")) $("statPagados").textContent = paid;
+}
+
+// ════════════════════════════
+// Leyenda del sold-strip (Sprint 2 ↔ 3B)
+// ════════════════════════════
+function updateProgressLegend() {
+  const paid  = BUYERS.filter(b => b.estado === "Pagado").length;
+  const apart = BUYERS.filter(b => b.estado === "Apartado").length;
+  const disp  = Math.max(0, 100 - BUYERS.length);
+  const $     = id => document.getElementById(id);
+  if ($("legendPaid"))      $("legendPaid").innerHTML      = `<i class="dot-paid"></i> Pagados: ${paid}`;
+  if ($("legendReserved"))  $("legendReserved").innerHTML  = `<i class="dot-reserved"></i> Apartados: ${apart}`;
+  if ($("legendAvailable")) $("legendAvailable").innerHTML = `<i class="dot-available"></i> Libres: ${disp}`;
+}
+
+// ════════════════════════════
+// Toast notification
+// ════════════════════════════
+function showToast(msg, type = "success") {
+  const t = Object.assign(document.createElement("div"), {
+    className: `rifa-toast rifa-toast--${type}`,
+    textContent: msg,
+  });
+  document.body.appendChild(t);
+  requestAnimationFrame(() => t.classList.add("rifa-toast--visible"));
+  setTimeout(() => {
+    t.classList.remove("rifa-toast--visible");
+    setTimeout(() => t.remove(), 350);
+  }, 2800);
+}
+
+// ════════════════════════════
+// Apartar números (formulario público)
+// ════════════════════════════
+function apartarNow() {
+  const inputs  = document.querySelectorAll("#publica .reserve-form input");
+  const nombre  = inputs[0]?.value.trim();
+  const cel     = inputs[1]?.value.trim();
+
+  if (!nombre) { showToast("⚠️ Escribe tu nombre", "error"); return; }
+  if (!cel)    { showToast("⚠️ Escribe tu celular", "error"); return; }
+
+  const selected = Object.keys(numberStates).filter(n => numberStates[n] === "selected");
+  if (!selected.length) {
+    showToast("⚠️ Selecciona al menos un número en la grilla", "error");
+    return;
+  }
+
+  selected.forEach(num => {
+    BUYERS.push({ num, nombre, cel, estado: "Apartado" });
+    numberStates[num] = "reserved";
+  });
+
+  saveState();
+  rebuildNumberGrid();
+  syncSelectedInput();
+  renderGestionar();
+  updateManageStats();
+  updateProgressLegend();
+
+  if (inputs[0]) inputs[0].value = "";
+  if (inputs[1]) inputs[1].value = "";
+
+  const label = selected.length > 1 ? `${selected.length} números` : `número ${selected[0]}`;
+  showToast(`✅ ${label} apartado(s) para ${nombre} 🎉`);
+}
+
+// ════════════════════════════
+// Acciones de gestionar
+// ════════════════════════════
+function markPaid(num) {
+  const b = BUYERS.find(b => b.num === num);
+  if (!b) return;
+  b.estado         = "Pagado";
+  numberStates[num] = "paid";
+  saveState();
+  renderGestionar();
+  updateManageStats();
+  updateProgressLegend();
+  rebuildNumberGrid();
+  showToast(`✅ Número ${num} marcado como pagado`);
+}
+
+function liberarNum(num) {
+  const idx = BUYERS.findIndex(b => b.num === num);
+  if (idx === -1) return;
+  BUYERS.splice(idx, 1);
+  numberStates[num] = "available";
+  saveState();
+  renderGestionar();
+  updateManageStats();
+  updateProgressLegend();
+  rebuildNumberGrid();
+  showToast(`🔓 Número ${num} liberado`);
+}
+
+// ════════════════════════════
+// Resetear a demo
+// ════════════════════════════
+function resetToDemo() {
+  BUYERS.length = 0;
+  BUYERS.push(...DEMO_BUYERS.map(b => ({ ...b })));
+  Object.keys(numberStates).forEach(k => delete numberStates[k]);
+  localStorage.removeItem(STORAGE_KEY);
+  rebuildNumberGrid();
+  renderGestionar();
+  updateManageStats();
+  updateProgressLegend();
+}
+
+// ════════════════════════════
+// Event listeners — Sprint 3B
+// ════════════════════════════
+document.getElementById("btnApartar")
+  ?.addEventListener("click", apartarNow);
+
+document.getElementById("btnResetDemo")
+  ?.addEventListener("click", () => {
+    if (!confirm("¿Limpiar todos los compradores y volver al demo?")) return;
+    resetToDemo();
+    showToast("🔄 Datos reiniciados al demo");
+  });
+
+document.getElementById("gestionarTbody")
+  ?.addEventListener("click", e => {
+    const btn = e.target.closest("[data-action]");
+    if (!btn) return;
+    const { num, action } = btn.dataset;
+    if (action === "pagar")   markPaid(num);
+    if (action === "liberar") liberarNum(num);
+  });
+
+// ════════════════════════════
+// initApp — carga estado y arranca la UI
+// ════════════════════════════
+function initApp() {
+  const saved = loadState();
+  if (saved?.buyers && saved?.numberStates) {
+    BUYERS.length = 0;
+    BUYERS.push(...saved.buyers);
+    Object.assign(numberStates, saved.numberStates);
+  }
+  buildNumberGrid();        // usa numberStates ya cargados (o PRESET como fallback)
+  renderGestionar();
+  updateManageStats();
+  updateProgressLegend();
+}
+
+initApp();
