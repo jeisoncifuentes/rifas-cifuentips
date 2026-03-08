@@ -328,47 +328,55 @@
               <form class="raffle-form" autocomplete="off">
                 <label>
                   Nombre de la rifa
-                  <input type="text" value="Freidora de aire Oster" placeholder="Ej: Freidora de aire Oster" />
+                  <input type="text" id="cfgNombre" value="Freidora de aire Oster" placeholder="Ej: Freidora de aire Oster" />
                 </label>
                 <label>
                   Premio
-                  <input type="text" value="Freidora de aire de 4 litros" placeholder="Describe el premio" />
+                  <input type="text" id="cfgPremio" value="Freidora de aire de 4 litros" placeholder="Describe el premio" />
                 </label>
                 <label>
                   Descripción
-                  <textarea rows="3" placeholder="Cuéntale a los participantes sobre la rifa...">Rifa para impulsar ventas del negocio. El ganador se define con las últimas dos cifras de la lotería del Valle.</textarea>
+                  <textarea id="cfgDesc" rows="3" placeholder="Cuéntale a los participantes sobre la rifa...">Rifa para impulsar ventas del negocio. El ganador se define con las últimas dos cifras de la lotería del Valle.</textarea>
                 </label>
                 <div class="input-row">
                   <label>
                     Cantidad de números
-                    <select>
-                      <option>50 números</option>
-                      <option selected>100 números</option>
-                      <option>200 números</option>
+                    <select id="cfgTotal">
+                      <option value="50">50 números</option>
+                      <option value="100" selected>100 números</option>
+                      <option value="200">200 números</option>
                     </select>
                   </label>
                   <label>
                     Precio por número (COP)
-                    <input type="text" value="10000" />
+                    <input type="text" id="cfgPrecio" value="10000" />
                   </label>
                 </div>
                 <div class="input-row">
                   <label>
                     Fecha del sorteo
-                    <input type="date" value="2026-04-20" />
+                    <input type="date" id="cfgFecha" value="2026-04-20" />
                   </label>
                   <label>
                     Contacto WhatsApp
-                    <input type="text" value="3150000000" placeholder="Número celular" />
+                    <input type="text" id="cfgWa" value="3150000000" placeholder="Número celular" />
                   </label>
                 </div>
                 <label>
                   Regla del sorteo
-                  <input type="text" value="Últimas dos cifras del premio mayor de la lotería del Valle" />
+                  <input type="text" id="cfgRegla" value="Últimas dos cifras del premio mayor de la lotería del Valle" />
                 </label>
+                <div class="form-group">
+                  <p class="form-label-text">Imagen del premio (opcional)</p>
+                  <div class="file-upload-wrap">
+                    <input type="file" id="cfgImagen" accept="image/*" class="file-input-hidden" />
+                    <label for="cfgImagen" class="ghost-btn" style="cursor:pointer">📸 Subir foto del premio</label>
+                    <span class="file-name-hint" id="cfgImagenHint">Sin imagen</span>
+                  </div>
+                </div>
                 <div class="form-actions">
-                  <button type="button" class="ghost-btn">Guardar borrador</button>
-                  <button type="button" class="primary-btn glow-btn">🚀 Publicar rifa</button>
+                  <button type="button" class="ghost-btn" id="btnBorrador">💾 Guardar borrador</button>
+                  <button type="button" class="primary-btn glow-btn" id="btnPublicar">🚀 Publicar rifa</button>
                 </div>
               </form>
             </div>
@@ -377,12 +385,12 @@
               <p class="eyebrow-tag">👁️ Vista previa</p>
               <h4>Así se ve en celular</h4>
               <div class="preview-phone">
-                <div class="preview-img"></div>
+                <div class="preview-img" id="prevImagen"></div>
                 <div class="preview-body">
                   <span class="pill-live" style="font-size:0.75rem">🟢 Activa</span>
-                  <h5>Freidora de aire Oster</h5>
-                  <p class="preview-price">$10.000 COP por número</p>
-                  <p class="preview-date">📅 Sorteo: 20 abril 2026</p>
+                  <h5 id="prevNombre">Freidora de aire Oster</h5>
+                  <p class="preview-price" id="prevPrecio">$10.000 COP por número</p>
+                  <p class="preview-date" id="prevFecha">📅 Sorteo: 20 abril 2026</p>
                   <p class="preview-rule">🎲 Lotería del Valle</p>
                   <button class="primary-btn glow-btn full" style="margin-top:12px">Compartir rifa 🔗</button>
                 </div>
@@ -396,9 +404,10 @@
           <div class="public-hero">
             <div class="public-hero-content">
               <span class="pill-live">🟢 Rifa activa</span>
-              <h3>Freidora de aire Oster</h3>
-              <p>Organizada por <strong>Tienda El Buen Gusto</strong> · $10.000 COP por número</p>
+              <h3 id="heroRifaNombre">Freidora de aire Oster</h3>
+              <p id="heroRifaSub">Organizada por <strong>Tienda El Buen Gusto</strong> · $10.000 COP por número</p>
             </div>
+            <div class="hero-prize-img" id="heroPrizeImg"></div>
             <button class="whatsapp-btn">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
               Hablar por WhatsApp
@@ -411,7 +420,7 @@
           <div class="countdown-strip">
             <div class="cd-label">
               <p class="eyebrow-tag" style="margin-bottom:2px">⏳ Tiempo restante</p>
-              <p class="cd-date">Sorteo: 20 de abril · Lotería del Valle</p>
+              <p class="cd-date" id="cdDate">Sorteo: 20 de abril · Lotería del Valle</p>
             </div>
             <div class="countdown-row">
               <div class="flip-card">
@@ -474,7 +483,7 @@
             <div class="info-card">
               <div class="info-row">
                 <span class="info-label">📅 Fecha del sorteo</span>
-                <strong>20 abril 2026</strong>
+                <strong id="infoFecha">20 abril 2026</strong>
               </div>
               <div class="info-row">
                 <span class="info-label">🎲 Cómo se elige</span>
