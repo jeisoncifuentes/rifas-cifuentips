@@ -155,7 +155,7 @@ function exportCSV() {
   const blob    = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url     = URL.createObjectURL(blob);
   const link    = Object.assign(document.createElement("a"), {
-    href: url, download: "compradores-rifas-freidora.csv",
+    href: url, download: `compradores-${((RIFA_CONFIG||{}).nombre||"rifa").toLowerCase().replace(/\s+/g,"-")}.csv`,
   });
   document.body.appendChild(link);
   link.click();
@@ -298,7 +298,7 @@ document.getElementById("btnShareResult")
   ?.addEventListener("click", () => {
     const num    = document.getElementById("drumDisplay").textContent;
     const person = document.getElementById("winnerPerson").textContent;
-    const msg    = `🏆 ¡Tenemos ganador!\n\n🎰 Número ganador: *${num}*\n👤 ${person}\n\n🎁 Rifa: Freidora de aire Oster\n📣 Organizado por Rifas Cifuentips`;
+    const msg    = `🏆 ¡Tenemos ganador!\n\n🎰 Número ganador: *${num}*\n👤 ${person}\n\n🎁 Rifa: ${(RIFA_CONFIG||{}).nombre || "Rifa"}\n📣 Organizado por Rifas Cifuentips`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
   });
 
@@ -402,10 +402,13 @@ function _drawTicket(nombre, cel, numeros) {
   ctx.beginPath(); ctx.moveTo(22, 72); ctx.lineTo(W - 22, 72); ctx.stroke();
 
   // ── Nombre de la rifa ──
+  const _cfg   = RIFA_CONFIG || {};
+  const _precio = `$${_fmtPrecio(_cfg.precio || 10000)} COP por número`;
+  const _fecha  = _fmtFecha(_cfg.fecha || "2026-04-20", { year: undefined });
   ctx.fillStyle = "#eef2ff"; ctx.font = "bold 24px sans-serif";
-  ctx.textAlign = "center"; ctx.fillText("Freidora de aire Oster", W / 2, 110);
+  ctx.textAlign = "center"; ctx.fillText(_cfg.nombre || "Freidora de aire Oster", W / 2, 110);
   ctx.fillStyle = "#94a3b8"; ctx.font = "13px sans-serif";
-  ctx.fillText("$10.000 COP por número  ·  Sorteo: 20 abril 2026  ·  Lotería del Valle", W / 2, 136);
+  ctx.fillText(`${_precio}  ·  Sorteo: ${_fecha}  ·  Lotería del Valle`, W / 2, 136);
 
   // ── Bolas con números ──
   const nums = numeros.split(",").map(s => s.trim()).filter(Boolean);
@@ -509,7 +512,8 @@ document.getElementById("btnShareTicket")
     const inputs  = document.querySelectorAll(".reserve-form input");
     const nombre  = inputs[0]?.value?.trim() || "Participante";
     const nums    = inputs[2]?.value?.trim() || "—";
-    const msg     = `🎟️ ¡Aparté mis números!\n\n👤 *${nombre}*\n🔢 Números: *${nums}*\n\n🎁 Rifa: Freidora de aire Oster\n💰 $10.000 COP cada uno\n📅 Sorteo: 20 abril 2026\n\nOrganizado por *Rifas Cifuentips* 🌟`;
+    const _c  = RIFA_CONFIG || {};
+    const msg = `🎟️ ¡Aparté mis números!\n\n👤 *${nombre}*\n🔢 Números: *${nums}*\n\n🎁 Rifa: ${_c.nombre || "Rifa"}\n💰 $${_fmtPrecio(_c.precio || 10000)} COP cada uno\n📅 Sorteo: ${_fmtFecha(_c.fecha || "2026-04-20")}\n\nOrganizado por *Rifas Cifuentips* 🌟`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
   });
 
@@ -526,7 +530,7 @@ function initCountdown() {
   if (_cdInterval) return; // ya corriendo
 
   // Fecha del sorteo (Colombia UTC-5)
-  const SORTEO = new Date("2026-04-20T20:00:00-05:00");
+  const SORTEO = new Date(`${RIFA_CONFIG?.fecha || "2026-04-20"}T20:00:00-05:00`);
 
   function _setFlip(id, val) {
     const el = document.getElementById(id);
@@ -567,7 +571,7 @@ function animateProgress() {
   // Sprint 3B: valores dinámicos desde BUYERS
   const PAID     = BUYERS.filter(b => b.estado === "Pagado").length;
   const RESERVED = BUYERS.filter(b => b.estado === "Apartado").length;
-  const TOTAL    = 100;
+  const TOTAL    = RIFA_CONFIG?.total ?? 100;
   const TARGET   = PAID; // la barra muestra solo pagados; apartados se ven en leyenda
 
   updateProgressLegend(); // Sprint 3B: actualizar leyenda con datos reales
@@ -621,13 +625,14 @@ function animateProgress() {
 // FEATURE: Viral share
 // ════════════════════════════
 function shareRifa() {
-  const paid = BUYERS.filter(b => b.estado === "Pagado").length; // Sprint 3B: dinámico
+  const paid = BUYERS.filter(b => b.estado === "Pagado").length;
+  const cfg  = RIFA_CONFIG || {};
   const msg =
     `🎉 *¡Rifas Cifuentips!*\n\n` +
-    `🏆 Premio: *Freidora de aire Oster*\n` +
-    `💰 Solo *$10.000 COP* por número\n` +
-    `📅 Sorteo: *20 de abril de 2026*\n` +
-    `⚡ ¡Ya van ${paid}/100 vendidos!\n\n` +
+    `🏆 Premio: *${cfg.nombre || "Rifa"}*\n` +
+    `💰 Solo *$${_fmtPrecio(cfg.precio || 10000)} COP* por número\n` +
+    `📅 Sorteo: *${_fmtFecha(cfg.fecha || "2026-04-20")}*\n` +
+    `⚡ ¡Ya van ${paid}/${cfg.total || 100} vendidos!\n\n` +
     `Corre a apartar tu número antes de que se agoten 👇`;
   window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
 }
@@ -743,7 +748,7 @@ function renderGestionar() {
 function updateManageStats() {
   const paid  = BUYERS.filter(b => b.estado === "Pagado").length;
   const apart = BUYERS.filter(b => b.estado === "Apartado").length;
-  const disp  = Math.max(0, 100 - BUYERS.length);
+  const disp  = Math.max(0, (RIFA_CONFIG?.total ?? 100) - BUYERS.length);
   const $     = id => document.getElementById(id);
   if ($("statDisp"))    $("statDisp").textContent    = disp;
   if ($("statApart"))   $("statApart").textContent   = apart;
@@ -756,7 +761,7 @@ function updateManageStats() {
 function updateProgressLegend() {
   const paid  = BUYERS.filter(b => b.estado === "Pagado").length;
   const apart = BUYERS.filter(b => b.estado === "Apartado").length;
-  const disp  = Math.max(0, 100 - BUYERS.length);
+  const disp  = Math.max(0, (RIFA_CONFIG?.total ?? 100) - BUYERS.length);
   const $     = id => document.getElementById(id);
   if ($("legendPaid"))      $("legendPaid").innerHTML      = `<i class="dot-paid"></i> Pagados: ${paid}`;
   if ($("legendReserved"))  $("legendReserved").innerHTML  = `<i class="dot-reserved"></i> Apartados: ${apart}`;
@@ -884,16 +889,227 @@ document.getElementById("gestionarTbody")
 // initApp — carga estado y arranca la UI
 // ════════════════════════════
 function initApp() {
+  // Sprint 3C: cargar configuración de rifa
+  const savedCfg = loadConfig();
+  if (savedCfg) Object.assign(RIFA_CONFIG, savedCfg);
+
   const saved = loadState();
   if (saved?.buyers && saved?.numberStates) {
     BUYERS.length = 0;
     BUYERS.push(...saved.buyers);
     Object.assign(numberStates, saved.numberStates);
   }
-  buildNumberGrid();        // usa numberStates ya cargados (o PRESET como fallback)
+  buildNumberGrid();
   renderGestionar();
   updateManageStats();
   updateProgressLegend();
+  applyConfig();        // Sprint 3C
+  populateCrearForm();  // Sprint 3C
+}
+// initApp() se llama al final del archivo (después de que Sprint 3C inicializa RIFA_CONFIG)
+
+/* ══════════════════════════════════════════════
+   SPRINT 3C — PERSONALIZACIÓN DE RIFA
+   ══════════════════════════════════════════════ */
+
+const CONFIG_KEY = "rifas-config-v1";
+
+const DEFAULT_CONFIG = {
+  nombre:   "Freidora de aire Oster",
+  premio:   "Freidora de aire de 4 litros",
+  desc:     "Rifa para impulsar ventas del negocio. El ganador se define con las últimas dos cifras de la lotería del Valle.",
+  total:    100,
+  precio:   10000,
+  fecha:    "2026-04-20",
+  whatsapp: "3150000000",
+  regla:    "Últimas dos cifras del premio mayor de la lotería del Valle",
+  imagen:   null,
+};
+
+let RIFA_CONFIG = { ...DEFAULT_CONFIG };
+
+// ════════════════════════════
+// Helpers de formato
+// ════════════════════════════
+function _fmtPrecio(n) {
+  return Number(n).toLocaleString("es-CO");
 }
 
+function _fmtFecha(iso, opts = {}) {
+  try {
+    const defaults = { day: "numeric", month: "long", year: "numeric" };
+    return new Date(iso + "T12:00:00").toLocaleDateString("es-CO", { ...defaults, ...opts });
+  } catch { return iso; }
+}
+
+// ════════════════════════════
+// Guardar / Cargar configuración
+// ════════════════════════════
+function saveConfig() {
+  try {
+    localStorage.setItem(CONFIG_KEY, JSON.stringify(RIFA_CONFIG));
+  } catch (e) { console.warn("saveConfig:", e); }
+}
+
+function loadConfig() {
+  try {
+    const raw = localStorage.getItem(CONFIG_KEY);
+    if (!raw) return null;
+    return { ...DEFAULT_CONFIG, ...JSON.parse(raw) };
+  } catch { return null; }
+}
+
+// ════════════════════════════
+// Aplicar configuración a la UI
+// ════════════════════════════
+function applyConfig() {
+  const c = RIFA_CONFIG;
+  const $ = id => document.getElementById(id);
+
+  if ($("heroRifaNombre")) $("heroRifaNombre").textContent = c.nombre;
+  if ($("heroRifaSub"))    $("heroRifaSub").innerHTML =
+    `Organizada por <strong>Tienda El Buen Gusto</strong> · $${_fmtPrecio(c.precio)} COP por número`;
+
+  if ($("cdDate")) {
+    const dia = new Date(c.fecha + "T12:00:00")
+      .toLocaleDateString("es-CO", { day: "numeric", month: "long" });
+    $("cdDate").textContent = `Sorteo: ${dia} · Lotería del Valle`;
+  }
+
+  if ($("infoFecha")) $("infoFecha").textContent = _fmtFecha(c.fecha);
+
+  const winTitle = document.querySelector("#winnerModal .modal-title");
+  if (winTitle) winTitle.textContent = c.nombre;
+
+  const chip = document.querySelector(".numbers-card .chip-tag");
+  if (chip) chip.textContent = `${c.total} números`;
+
+  if ($("prevNombre")) $("prevNombre").textContent = c.nombre;
+  if ($("prevPrecio")) $("prevPrecio").textContent = `$${_fmtPrecio(c.precio)} COP por número`;
+  if ($("prevFecha"))  $("prevFecha").textContent  =
+    `📅 Sorteo: ${_fmtFecha(c.fecha, { year: undefined })}`;
+
+  _applyHeroImage(c.imagen);
+  _applyPreviewImage(c.imagen);
+
+  // Resetear countdown para que use la nueva fecha
+  if (_cdInterval) { clearInterval(_cdInterval); _cdInterval = null; }
+}
+
+function _applyHeroImage(imgUrl) {
+  const el = document.getElementById("heroPrizeImg");
+  if (!el) return;
+  if (imgUrl) {
+    el.style.backgroundImage = `url(${imgUrl})`;
+    el.classList.add("has-img");
+  } else {
+    el.style.backgroundImage = "";
+    el.classList.remove("has-img");
+  }
+}
+
+function _applyPreviewImage(imgUrl) {
+  const el = document.getElementById("prevImagen");
+  if (!el) return;
+  if (imgUrl) {
+    el.style.backgroundImage = `url(${imgUrl})`;
+    el.classList.add("has-img");
+    el.innerHTML = "";
+  } else {
+    el.style.backgroundImage = "";
+    el.classList.remove("has-img");
+  }
+}
+
+// ════════════════════════════
+// Formulario crear ↔ RIFA_CONFIG
+// ════════════════════════════
+function populateCrearForm() {
+  const $ = id => document.getElementById(id);
+  if ($("cfgNombre"))  $("cfgNombre").value  = RIFA_CONFIG.nombre;
+  if ($("cfgPremio"))  $("cfgPremio").value  = RIFA_CONFIG.premio;
+  if ($("cfgDesc"))    $("cfgDesc").value     = RIFA_CONFIG.desc;
+  if ($("cfgTotal"))   $("cfgTotal").value    = String(RIFA_CONFIG.total);
+  if ($("cfgPrecio"))  $("cfgPrecio").value   = String(RIFA_CONFIG.precio);
+  if ($("cfgFecha"))   $("cfgFecha").value    = RIFA_CONFIG.fecha;
+  if ($("cfgWa"))      $("cfgWa").value       = RIFA_CONFIG.whatsapp;
+  if ($("cfgRegla"))   $("cfgRegla").value    = RIFA_CONFIG.regla;
+}
+
+function readCrearForm() {
+  const $ = id => document.getElementById(id);
+  const nombre  = $("cfgNombre")?.value.trim();
+  const premio  = $("cfgPremio")?.value.trim();
+  const desc    = $("cfgDesc")?.value.trim();
+  const total   = parseInt($("cfgTotal")?.value);
+  const precio  = parseInt(($("cfgPrecio")?.value || "").replace(/\D/g, ""));
+  const fecha   = $("cfgFecha")?.value;
+  const wa      = $("cfgWa")?.value.trim();
+  const regla   = $("cfgRegla")?.value.trim();
+  if (nombre)      RIFA_CONFIG.nombre   = nombre;
+  if (premio)      RIFA_CONFIG.premio   = premio;
+  if (desc)        RIFA_CONFIG.desc     = desc;
+  if (total > 0)   RIFA_CONFIG.total    = total;
+  if (precio > 0)  RIFA_CONFIG.precio   = precio;
+  if (fecha)       RIFA_CONFIG.fecha    = fecha;
+  if (wa)          RIFA_CONFIG.whatsapp = wa;
+  if (regla)       RIFA_CONFIG.regla    = regla;
+}
+
+// Live preview mientras el usuario escribe
+function updateLivePreview() {
+  const $ = id => document.getElementById(id);
+  const nombre = $("cfgNombre")?.value.trim() || RIFA_CONFIG.nombre;
+  const precio = parseInt(($("cfgPrecio")?.value || "").replace(/\D/g, "")) || RIFA_CONFIG.precio;
+  const fecha  = $("cfgFecha")?.value || RIFA_CONFIG.fecha;
+  if ($("prevNombre")) $("prevNombre").textContent = nombre;
+  if ($("prevPrecio")) $("prevPrecio").textContent = `$${_fmtPrecio(precio)} COP por número`;
+  if ($("prevFecha"))  $("prevFecha").textContent  =
+    `📅 Sorteo: ${_fmtFecha(fecha, { year: undefined })}`;
+}
+
+function publicarRifa() {
+  readCrearForm();
+  saveConfig();
+  applyConfig();
+  showToast("🚀 ¡Rifa publicada! Los cambios ya se ven en la página pública.");
+  setTimeout(() => switchView("publica"), 1400);
+}
+
+// ════════════════════════════
+// Event listeners — Sprint 3C
+// ════════════════════════════
+document.getElementById("cfgImagen")?.addEventListener("change", function () {
+  const file = this.files[0];
+  if (!file) return;
+  if (file.size > 3 * 1024 * 1024) {
+    showToast("⚠️ La imagen debe pesar menos de 3 MB", "error");
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = e => {
+    RIFA_CONFIG.imagen = e.target.result;
+    _applyPreviewImage(RIFA_CONFIG.imagen);
+    const hint = document.getElementById("cfgImagenHint");
+    if (hint) hint.textContent = file.name;
+    showToast("📸 Imagen cargada — pulsa 'Publicar rifa' para guardar");
+  };
+  reader.readAsDataURL(file);
+});
+
+["cfgNombre", "cfgPrecio", "cfgFecha"].forEach(id => {
+  document.getElementById(id)?.addEventListener("input", updateLivePreview);
+});
+
+document.getElementById("btnPublicar")?.addEventListener("click", publicarRifa);
+
+document.getElementById("btnBorrador")?.addEventListener("click", () => {
+  readCrearForm();
+  saveConfig();
+  showToast("💾 Borrador guardado");
+});
+
+// ════════════════════════════
+// Arranque final (después de que RIFA_CONFIG está declarado)
+// ════════════════════════════
 initApp();

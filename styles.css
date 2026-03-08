@@ -2028,3 +2028,23 @@ td strong { color: var(--text); }
 }
 .rifa-toast--success { border-color: rgba(0,229,115,0.45); }
 .rifa-toast--error   { border-color: rgba(251,146,60,0.45); }
+
+/* ══════════════════════════════════════════════
+   SPRINT 3C — Personalización de rifa
+   ══════════════════════════════════════════════ */
+.form-label-text   { font-size: 0.8rem; font-weight: 600; color: var(--ink-2);
+                     margin-bottom: 6px; letter-spacing: 0.03em; }
+.file-upload-wrap  { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.file-input-hidden { display: none; }
+.file-name-hint    { font-size: 0.78rem; color: var(--ink-3); }
+.form-group        { margin-bottom: 16px; }
+
+.hero-prize-img {
+  width: 72px; height: 72px;
+  border-radius: var(--r-lg);
+  background-size: cover; background-position: center;
+  border: 2px solid var(--border-hi);
+  flex-shrink: 0; display: none;
+}
+.hero-prize-img.has-img { display: block; }
+.preview-img.has-img    { background-size: cover; background-position: center; }
