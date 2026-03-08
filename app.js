@@ -31,7 +31,11 @@ function switchView(target) {
   if (viewTitle) viewTitle.textContent = titles[target] || "Rifas Cifuentips";
 
   // Generar grilla de números al entrar a la vista pública
-  if (target === "publica") buildNumberGrid();
+  if (target === "publica") {
+    buildNumberGrid();
+    initCountdown();    // ← Sprint 2
+    animateProgress(); // ← Sprint 2
+  }
 }
 
 navLinks.forEach(btn => {
@@ -502,3 +506,153 @@ document.getElementById("btnShareTicket")
     const msg     = `🎟️ ¡Aparté mis números!\n\n👤 *${nombre}*\n🔢 Números: *${nums}*\n\n🎁 Rifa: Freidora de aire Oster\n💰 $10.000 COP cada uno\n📅 Sorteo: 20 abril 2026\n\nOrganizado por *Rifas Cifuentips* 🌟`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
   });
+
+/* ══════════════════════════════════════════════
+   SPRINT 2 — VIRALIZACIÓN Y CONVERSIÓN
+   ══════════════════════════════════════════════ */
+
+// ════════════════════════════
+// FEATURE: Countdown timer
+// ════════════════════════════
+let _cdInterval = null;
+
+function initCountdown() {
+  if (_cdInterval) return; // ya corriendo
+
+  // Fecha del sorteo (Colombia UTC-5)
+  const SORTEO = new Date("2026-04-20T20:00:00-05:00");
+
+  function _setFlip(id, val) {
+    const el = document.getElementById(id);
+    if (!el || el.textContent === val) return;
+    el.textContent = val;
+    el.classList.remove("cd-tick");
+    requestAnimationFrame(() => el.classList.add("cd-tick"));
+  }
+
+  function _tick() {
+    const diff = SORTEO - new Date();
+    if (diff <= 0) {
+      ["cdDays","cdHours","cdMins","cdSecs"].forEach(id => _setFlip(id, "00"));
+      clearInterval(_cdInterval);
+      _cdInterval = null;
+      return;
+    }
+    const pad = n => String(n).padStart(2, "0");
+    _setFlip("cdDays",  pad(Math.floor(diff / 864e5)));
+    _setFlip("cdHours", pad(Math.floor((diff % 864e5) / 36e5)));
+    _setFlip("cdMins",  pad(Math.floor((diff % 36e5) / 6e4)));
+    _setFlip("cdSecs",  pad(Math.floor((diff % 6e4) / 1e3)));
+  }
+
+  _tick();
+  _cdInterval = setInterval(_tick, 1000);
+}
+
+// ════════════════════════════
+// FEATURE: Animated progress bar
+// ════════════════════════════
+let _progTimer = null;
+
+function animateProgress() {
+  // Reiniciar si ya estaba corriendo
+  if (_progTimer) { clearInterval(_progTimer); _progTimer = null; }
+
+  const PAID     = 68;
+  const RESERVED = 12;
+  const TOTAL    = 100;
+  const TARGET   = PAID; // la barra muestra solo pagados; apartados se ven en leyenda
+
+  // Reset visual instantáneo
+  const fillEl  = document.getElementById("soldFill");
+  const cntEl   = document.getElementById("soldCount");
+  const pctEl   = document.getElementById("soldPct");
+  const alertEl = document.getElementById("soldAlert");
+
+  if (fillEl)  { fillEl.style.transition = "none"; fillEl.style.width = "0%"; }
+  if (cntEl)   cntEl.textContent  = `0 / ${TOTAL} vendidos`;
+  if (pctEl)   { pctEl.textContent = "0%"; pctEl.style.color = ""; pctEl.style.textShadow = ""; }
+  if (alertEl) alertEl.textContent = "";
+
+  // Dar un frame para que el reset se pinte antes de animar
+  requestAnimationFrame(() => {
+    if (fillEl) fillEl.style.transition = ""; // restaurar transición CSS
+
+    let current = 0;
+    const step  = TARGET / 70; // ~70 pasos
+
+    _progTimer = setInterval(() => {
+      current = Math.min(current + step, TARGET);
+      const rounded = Math.round(current);
+      const pct     = Math.round((rounded / TOTAL) * 100);
+
+      if (cntEl)  cntEl.textContent  = `${rounded} / ${TOTAL} vendidos`;
+      if (fillEl) fillEl.style.width = pct + "%";
+
+      if (pctEl) {
+        pctEl.textContent = pct + "%";
+        if (pct >= 85)      { pctEl.style.color = "var(--amber)"; pctEl.style.textShadow = "0 0 16px rgba(251,146,60,0.5)"; }
+        else if (pct >= 65) { pctEl.style.color = "var(--gold)";  pctEl.style.textShadow = "0 0 16px rgba(255,214,10,0.5)"; }
+        else                { pctEl.style.color = "var(--green)"; pctEl.style.textShadow = "0 0 16px rgba(0,229,115,0.5)"; }
+      }
+
+      if (current >= TARGET) {
+        clearInterval(_progTimer);
+        _progTimer = null;
+        const remaining = TOTAL - PAID - RESERVED;
+        if (alertEl && remaining <= 30) {
+          alertEl.textContent = `⚡ ¡Solo quedan ${remaining} libres!`;
+        }
+      }
+    }, 22);
+  });
+}
+
+// ════════════════════════════
+// FEATURE: Viral share
+// ════════════════════════════
+function shareRifa() {
+  const msg =
+    `🎉 *¡Rifas Cifuentips!*\n\n` +
+    `🏆 Premio: *Freidora de aire Oster*\n` +
+    `💰 Solo *$10.000 COP* por número\n` +
+    `📅 Sorteo: *20 de abril de 2026*\n` +
+    `⚡ ¡Ya van 68/100 vendidos!\n\n` +
+    `Corre a apartar tu número antes de que se agoten 👇`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+}
+
+function copyRifaLink() {
+  const url = window.location.href;
+  const btn  = document.getElementById("btnCopyRifaLink");
+
+  const _flash = () => {
+    if (!btn) return;
+    const orig = btn.textContent;
+    btn.textContent = "✅ ¡Copiado!";
+    btn.style.color = "var(--green)";
+    setTimeout(() => { btn.textContent = orig; btn.style.color = ""; }, 2200);
+  };
+
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(url).then(_flash).catch(() => _fallbackCopy(url, _flash));
+  } else {
+    _fallbackCopy(url, _flash);
+  }
+}
+
+function _fallbackCopy(text, cb) {
+  const ta = Object.assign(document.createElement("textarea"), {
+    value: text, style: "position:fixed;opacity:0",
+  });
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand("copy"); cb(); } catch (_) {}
+  document.body.removeChild(ta);
+}
+
+// Eventos — viral share
+document.getElementById("btnShareRifa")
+  ?.addEventListener("click", shareRifa);
+document.getElementById("btnCopyRifaLink")
+  ?.addEventListener("click", copyRifaLink);
