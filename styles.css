@@ -2048,3 +2048,102 @@ td strong { color: var(--text); }
 }
 .hero-prize-img.has-img { display: block; }
 .preview-img.has-img    { background-size: cover; background-position: center; }
+
+/* ══════════════════════════════════════════════
+   SPRINT 4A — PANEL ADMIN AVANZADO
+   ══════════════════════════════════════════════ */
+
+/* ── Toolbar de búsqueda y filtros ── */
+.admin-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.search-wrap { flex: 1; min-width: 180px; }
+
+.search-input {
+  width: 100%;
+  background: var(--glass);
+  border: 1px solid var(--border-hi);
+  border-radius: 10px;
+  color: var(--text);
+  padding: 10px 16px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus { border-color: rgba(0,229,115,0.5); }
+
+.filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.filter-tab {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-3);
+  padding: 8px 14px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.18s;
+  white-space: nowrap;
+}
+
+.filter-tab:hover {
+  border-color: var(--border-hi);
+  color: var(--text-2);
+}
+
+.filter-tab.active {
+  background: rgba(0,229,115,0.12);
+  border-color: rgba(0,229,115,0.4);
+  color: var(--green);
+}
+
+/* ── Headers ordenables ── */
+.sort-th {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+
+.sort-th:hover { color: var(--green); }
+
+.sort-ico {
+  opacity: 0.4;
+  font-size: 0.72em;
+  margin-left: 4px;
+  display: inline-block;
+  transition: opacity 0.15s;
+}
+
+.sort-th.asc  .sort-ico,
+.sort-th.desc .sort-ico { opacity: 1; color: var(--green); }
+
+/* ── Edición inline ── */
+.edit-cell { cursor: default; }
+.edit-cell:hover { background: rgba(255,255,255,0.03); }
+.edit-cell.editing { background: rgba(0,229,115,0.06) !important; }
+
+.inline-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid var(--green);
+  color: var(--text);
+  font-family: inherit;
+  font-size: inherit;
+  width: 100%;
+  outline: none;
+  padding: 2px 0;
+}
+
+@media (max-width: 640px) {
+  .admin-toolbar { flex-direction: column; align-items: stretch; }
+  .search-wrap   { min-width: unset; }
+}

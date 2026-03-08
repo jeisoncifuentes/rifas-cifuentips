@@ -715,31 +715,42 @@ function renderGestionar() {
   const tbody = document.getElementById("gestionarTbody");
   if (!tbody) return;
 
+  const list = _filteredBuyers(); // Sprint 4A: filtro + búsqueda + orden
+
   if (BUYERS.length === 0) {
     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-3)">
       Sin compradores aún — los números se apartan desde la <em>vista pública</em>.
     </td></tr>`;
+    _updateSortHeaders();
     return;
   }
 
-  tbody.innerHTML = [...BUYERS]
-    .sort((a, b) => Number(a.num) - Number(b.num))
-    .map(b => {
-      const isApart = b.estado === "Apartado";
-      const pill = isApart
-        ? `<span class="pill-soon">⏳ Apartado</span>`
-        : `<span class="pill-live">✅ Pagado</span>`;
-      const btn = isApart
-        ? `<button class="action-btn green-btn" data-num="${b.num}" data-action="pagar">Marcar pagado</button>`
-        : `<button class="action-btn gray-btn"  data-num="${b.num}" data-action="liberar">Liberar</button>`;
-      return `<tr>
-        <td><strong>${b.num}</strong></td>
-        <td>${b.nombre}</td>
-        <td>${b.cel}</td>
-        <td>${pill}</td>
-        <td>${btn}</td>
-      </tr>`;
-    }).join("");
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-3)">
+      Sin resultados para «${_adminSearch}»
+    </td></tr>`;
+    _updateSortHeaders();
+    return;
+  }
+
+  tbody.innerHTML = list.map(b => {
+    const isApart = b.estado === "Apartado";
+    const pill = isApart
+      ? `<span class="pill-soon">⏳ Apartado</span>`
+      : `<span class="pill-live">✅ Pagado</span>`;
+    const btn = isApart
+      ? `<button class="action-btn green-btn" data-num="${b.num}" data-action="pagar">Marcar pagado</button>`
+      : `<button class="action-btn gray-btn"  data-num="${b.num}" data-action="liberar">Liberar</button>`;
+    return `<tr data-num="${b.num}">
+      <td><strong>${b.num}</strong></td>
+      <td class="edit-cell" data-field="nombre" data-num="${b.num}" title="Doble clic para editar">${b.nombre}</td>
+      <td class="edit-cell" data-field="cel" data-num="${b.num}" title="Doble clic para editar">${b.cel}</td>
+      <td>${pill}</td>
+      <td>${btn}</td>
+    </tr>`;
+  }).join("");
+
+  _updateSortHeaders();
 }
 
 // ════════════════════════════
@@ -1107,6 +1118,115 @@ document.getElementById("btnBorrador")?.addEventListener("click", () => {
   readCrearForm();
   saveConfig();
   showToast("💾 Borrador guardado");
+});
+
+/* ══════════════════════════════════════════════
+   SPRINT 4A — PANEL ADMIN AVANZADO
+   ══════════════════════════════════════════════ */
+
+// Estado de búsqueda, filtro y orden
+let _adminFilter = "todos";
+let _adminSearch = "";
+let _adminSort   = { key: "num", dir: 1 };
+
+// Retorna BUYERS filtrados, buscados y ordenados
+function _filteredBuyers() {
+  const q = _adminSearch.toLowerCase().trim();
+  return [...BUYERS]
+    .filter(b => {
+      if (_adminFilter !== "todos" && b.estado !== _adminFilter) return false;
+      if (q) return b.num.includes(q) || b.nombre.toLowerCase().includes(q) || b.cel.includes(q);
+      return true;
+    })
+    .sort((a, b) => {
+      const k  = _adminSort.key;
+      const va = k === "num" ? Number(a[k]) : (a[k] || "").toLowerCase();
+      const vb = k === "num" ? Number(b[k]) : (b[k] || "").toLowerCase();
+      return va < vb ? -_adminSort.dir : va > vb ? _adminSort.dir : 0;
+    });
+}
+
+// Actualiza los iconos de orden en los <th>
+function _updateSortHeaders() {
+  document.querySelectorAll(".sort-th").forEach(th => {
+    th.classList.remove("asc", "desc");
+    const ico = th.querySelector(".sort-ico");
+    if (th.dataset.sort === _adminSort.key) {
+      th.classList.add(_adminSort.dir === 1 ? "asc" : "desc");
+      if (ico) ico.textContent = _adminSort.dir === 1 ? "↑" : "↓";
+    } else {
+      if (ico) ico.textContent = "↕";
+    }
+  });
+}
+
+// ── Búsqueda en tiempo real ──
+document.getElementById("adminSearch")?.addEventListener("input", function () {
+  _adminSearch = this.value;
+  renderGestionar();
+});
+
+// ── Filtros de estado ──
+document.getElementById("filterTabs")?.addEventListener("click", e => {
+  const tab = e.target.closest("[data-filter]");
+  if (!tab) return;
+  _adminFilter = tab.dataset.filter;
+  document.querySelectorAll(".filter-tab").forEach(t => t.classList.remove("active"));
+  tab.classList.add("active");
+  renderGestionar();
+});
+
+// ── Ordenamiento por columna ──
+document.querySelector("#gestionar thead")?.addEventListener("click", e => {
+  const th = e.target.closest(".sort-th");
+  if (!th) return;
+  const key = th.dataset.sort;
+  if (_adminSort.key === key) {
+    _adminSort.dir *= -1;
+  } else {
+    _adminSort.key = key;
+    _adminSort.dir = 1;
+  }
+  renderGestionar();
+});
+
+// ── Edición inline con doble clic ──
+document.getElementById("gestionarTbody")?.addEventListener("dblclick", e => {
+  const cell = e.target.closest(".edit-cell");
+  if (!cell || cell.querySelector("input")) return;
+
+  const field   = cell.dataset.field;
+  const num     = cell.dataset.num;
+  const current = cell.textContent.trim();
+
+  cell.classList.add("editing");
+  const input     = document.createElement("input");
+  input.type      = field === "cel" ? "tel" : "text";
+  input.value     = current;
+  input.className = "inline-input";
+  cell.innerHTML  = "";
+  cell.appendChild(input);
+  input.focus();
+  input.select();
+
+  function commit() {
+    const val = input.value.trim();
+    if (val && val !== current) {
+      const buyer = BUYERS.find(b => b.num === num);
+      if (buyer) {
+        buyer[field] = val;
+        saveState();
+        showToast(`✏️ ${field === "nombre" ? "Nombre" : "Celular"} actualizado`);
+      }
+    }
+    renderGestionar();
+  }
+
+  input.addEventListener("blur", commit);
+  input.addEventListener("keydown", ev => {
+    if (ev.key === "Enter")  { ev.preventDefault(); input.blur(); }
+    if (ev.key === "Escape") { input.value = current; input.blur(); }
+  });
 });
 
 // ════════════════════════════
