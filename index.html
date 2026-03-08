@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crear rifas online en Andalucía, Valle | Rifas Cifuentips</title>
+    <meta
+      name="description"
+      content="Crea rifas online en Andalucía, Valle. Organiza números, apartados y pagos en una sola página para compartir por WhatsApp."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Unbounded:wght@700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Partículas de fondo -->
+    <div class="bg-particles" aria-hidden="true">
+      <span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span>
+    </div>
+
+    <div class="page-shell">
+      <!-- ═══════════════ SIDEBAR ═══════════════ -->
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <p class="brand-sub">Cifuentips Lab</p>
+            <h1>Rifas</h1>
+          </div>
+        </div>
+
+        <nav class="nav" role="navigation">
+          <button class="nav-link active" data-view="inicio">
+            <span class="nav-icon">🏠</span>
+            <span>Inicio</span>
+          </button>
+          <button class="nav-link" data-view="panel">
+            <span class="nav-icon">📊</span>
+            <span>Panel</span>
+          </button>
+          <button class="nav-link" data-view="crear">
+            <span class="nav-icon">✨</span>
+            <span>Crear rifa</span>
+          </button>
+          <button class="nav-link" data-view="publica">
+            <span class="nav-icon">🎟️</span>
+            <span>Página pública</span>
+          </button>
+          <button class="nav-link" data-view="gestionar">
+            <span class="nav-icon">⚙️</span>
+            <span>Gestionar</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-info">
+          <div class="sidebar-dot"></div>
+          <p>Rifas digitales para negocios y personas de Andalucía, Valle.</p>
+        </div>
+      </aside>
+
+      <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+      <main class="content">
+        <header class="topbar">
+          <div class="topbar-left">
+            <p class="topbar-eyebrow">Interfaz MVP</p>
+            <h2 id="view-title">Inicio</h2>
+          </div>
+          <div class="topbar-actions">
+            <button class="ghost-btn" data-view-target="publica">Ver demo</button>
+            <button class="primary-btn glow-btn" data-view-target="crear">
+              <span>✨</span> Crear mi rifa
+            </button>
+          </div>
+        </header>
+
+        <!-- ═══════ VISTA INICIO ═══════ -->
+        <section class="view active" id="inicio">
+
+          <div class="hero-block">
+            <div class="hero-copy">
+              <p class="eyebrow-tag">🎉 Rifas online para negocios y personas</p>
+              <h2 class="hero-title">
+                Crea tu rifa en<br />
+                <span class="gradient-text">5 minutos</span><br />
+                y vende por WhatsApp
+              </h2>
+              <p class="hero-lead">
+                Deja atrás la imagen artesanal. Con Rifas Cifuentips tienes una
+                página profesional con grilla de números, control de apartados y
+                pagos, todo desde tu celular.
+              </p>
+              <div class="hero-btns">
+                <button class="primary-btn glow-btn large-btn" data-view-target="crear">
+                  Publicar una rifa
+                </button>
+                <button class="outline-btn large-btn" data-view-target="publica">
+                  Ver ejemplo
+                </button>
+              </div>
+              <div class="feature-pills">
+                <span>📱 Ideal para WhatsApp</span>
+                <span>🎯 Hecho para celular</span>
+                <span>⚡ Listo en minutos</span>
+              </div>
+            </div>
+
+            <div class="hero-visual">
+              <div class="floating-ball ball-a">07</div>
+              <div class="floating-ball ball-b">24</div>
+              <div class="floating-ball ball-c">88</div>
+
+              <div class="phone-mockup">
+                <div class="phone-notch"></div>
+                <div class="phone-screen">
+                  <div class="phone-header">
+                    <span class="live-badge">🟢 Activa</span>
+                    <strong>Freidora Oster</strong>
+                  </div>
+                  <p class="phone-sub">100 números · $10.000 c/u</p>
+                  <div class="phone-grid">
+                    <span class="pn available">01</span>
+                    <span class="pn paid">02</span>
+                    <span class="pn reserved">03</span>
+                    <span class="pn available">04</span>
+                    <span class="pn paid">05</span>
+                    <span class="pn available">06</span>
+                    <span class="pn selected">07</span>
+                    <span class="pn available">08</span>
+                    <span class="pn reserved">09</span>
+                  </div>
+                  <button class="primary-btn full phone-cta">Apartar números</button>
+                  <div class="phone-progress">
+                    <div class="phone-progress-bar" style="width:68%"></div>
+                  </div>
+                  <p class="phone-meta">68/100 vendidos</p>
+                </div>
+              </div>
+
+              <div class="hero-badge-float">
+                <span>🏆</span>
+                <div>
+                  <strong>Premio mayor</strong>
+                  <p>Freidora de aire 4L</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tags de uso -->
+          <div class="use-tags">
+            <span>🛒 Tiendas de barrio</span>
+            <span>👗 Emprendimientos</span>
+            <span>🧺 Mercados</span>
+            <span>🎁 Anchetas</span>
+            <span>🏠 Rifas familiares</span>
+            <span>💼 Negocios locales</span>
+          </div>
+
+          <!-- Métricas -->
+          <div class="metrics-row">
+            <div class="metric-card">
+              <div class="metric-icon">⏱️</div>
+              <p class="metric-val">5 min</p>
+              <p class="metric-desc">Para crear y publicar tu rifa</p>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon">🎯</div>
+              <p class="metric-val">3 estados</p>
+              <p class="metric-desc">Disponible, apartado y pagado</p>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon">🔗</div>
+              <p class="metric-val">1 link</p>
+              <p class="metric-desc">Para compartir por WhatsApp</p>
+            </div>
+          </div>
+
+          <!-- Comparativa -->
+          <div class="compare-grid">
+            <div class="compare-card before-card">
+              <p class="compare-label">😓 Antes</p>
+              <ul>
+                <li>Imagen artesanal con números pegados a mano</li>
+                <li>Apartados por chat sin control</li>
+                <li>Confusión sobre qué número sigue libre</li>
+                <li>Poca credibilidad para el comprador</li>
+              </ul>
+            </div>
+            <div class="compare-vs">VS</div>
+            <div class="compare-card after-card">
+              <p class="compare-label">🚀 Con Rifas Cifuentips</p>
+              <ul>
+                <li>Página viva con grilla automática de números</li>
+                <li>Panel para marcar pagos y apartados</li>
+                <li>Todo el control desde tu celular</li>
+                <li>Rifa profesional que da confianza</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Casos de uso -->
+          <div class="section-head">
+            <p class="eyebrow-tag">🎯 Para quién</p>
+            <h3>¿Quiénes hacen rifas con nosotros?</h3>
+          </div>
+          <div class="cases-row">
+            <div class="case-card">
+              <div class="case-emoji">🏪</div>
+              <h4>Tiendas de barrio</h4>
+              <p>Para rifar mercados, electrodomésticos o bonos y mover ventas.</p>
+            </div>
+            <div class="case-card">
+              <div class="case-emoji">👩‍💼</div>
+              <h4>Emprendimientos</h4>
+              <p>Rifas de productos, fechas especiales o campañas de temporada.</p>
+            </div>
+            <div class="case-card">
+              <div class="case-emoji">👨‍👩‍👧</div>
+              <h4>Rifas familiares</h4>
+              <p>Organiza una rifa personal con orden y mejor presentación.</p>
+            </div>
+          </div>
+
+          <!-- CTA final -->
+          <div class="cta-banner">
+            <div class="cta-banner-content">
+              <h3>Publica tu primera rifa hoy</h3>
+              <p>En menos de 5 minutos tienes tu rifa lista para compartir por WhatsApp.</p>
+              <button class="primary-btn glow-btn large-btn" data-view-target="crear">
+                🎉 Quiero crear mi rifa
+              </button>
+            </div>
+            <div class="cta-banner-balls">
+              <span>01</span><span>07</span><span>13</span><span>24</span><span>37</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══════ VISTA PANEL ═══════ -->
+        <section class="view" id="panel">
+          <div class="view-head">
+            <div>
+              <p class="eyebrow-tag">📊 Tu resumen</p>
+              <h3>Tus rifas</h3>
+            </div>
+            <button class="primary-btn glow-btn" data-view-target="crear">
+              + Nueva rifa
+            </button>
+          </div>
+
+          <div class="stats-row">
+            <div class="stat-card">
+              <p class="stat-label">Rifas activas</p>
+              <p class="stat-val green">3</p>
+            </div>
+            <div class="stat-card">
+              <p class="stat-label">Números pagados</p>
+              <p class="stat-val gold">81</p>
+            </div>
+            <div class="stat-card">
+              <p class="stat-label">Por cobrar</p>
+              <p class="stat-val amber">24</p>
+            </div>
+            <div class="stat-card">
+              <p class="stat-label">Ingresos estimados</p>
+              <p class="stat-val green">$810.000</p>
+            </div>
+          </div>
+
+          <div class="raffle-cards">
+            <div class="raffle-card">
+              <div class="raffle-card-top">
+                <span class="pill-live">🟢 Activa</span>
+                <span class="raffle-date">20 abril 2026</span>
+              </div>
+              <h4>Freidora de aire Oster</h4>
+              <p>100 números · $10.000 COP</p>
+              <div class="prog-bar">
+                <div class="prog-fill" style="width:68%"></div>
+              </div>
+              <div class="raffle-meta-row">
+                <span>✅ 68 vendidos</span>
+                <span>⏳ 12 apartados</span>
+              </div>
+              <button class="ghost-btn full" data-view-target="gestionar">Gestionar →</button>
+            </div>
+
+            <div class="raffle-card">
+              <div class="raffle-card-top">
+                <span class="pill-soon">🟡 Próxima</span>
+                <span class="raffle-date">30 abril 2026</span>
+              </div>
+              <h4>Mercado familiar</h4>
+              <p>50 números · $5.000 COP</p>
+              <div class="prog-bar">
+                <div class="prog-fill amber-fill" style="width:24%"></div>
+              </div>
+              <div class="raffle-meta-row">
+                <span>✅ 12 vendidos</span>
+                <span>⏳ 4 apartados</span>
+              </div>
+              <button class="ghost-btn full" data-view-target="gestionar">Gestionar →</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══════ VISTA CREAR ═══════ -->
+        <section class="view" id="crear">
+          <div class="view-head">
+            <div>
+              <p class="eyebrow-tag">✨ Paso 1 de 1</p>
+              <h3>Crear una nueva rifa</h3>
+            </div>
+            <span class="chip-tag">Formulario simple</span>
+          </div>
+
+          <div class="form-layout">
+            <div class="form-card">
+              <form class="raffle-form" autocomplete="off">
+                <label>
+                  Nombre de la rifa
+                  <input type="text" value="Freidora de aire Oster" placeholder="Ej: Freidora de aire Oster" />
+                </label>
+                <label>
+                  Premio
+                  <input type="text" value="Freidora de aire de 4 litros" placeholder="Describe el premio" />
+                </label>
+                <label>
+                  Descripción
+                  <textarea rows="3" placeholder="Cuéntale a los participantes sobre la rifa...">Rifa para impulsar ventas del negocio. El ganador se define con las últimas dos cifras de la lotería del Valle.</textarea>
+                </label>
+                <div class="input-row">
+                  <label>
+                    Cantidad de números
+                    <select>
+                      <option>50 números</option>
+                      <option selected>100 números</option>
+                      <option>200 números</option>
+                    </select>
+                  </label>
+                  <label>
+                    Precio por número (COP)
+                    <input type="text" value="10000" />
+                  </label>
+                </div>
+                <div class="input-row">
+                  <label>
+                    Fecha del sorteo
+                    <input type="date" value="2026-04-20" />
+                  </label>
+                  <label>
+                    Contacto WhatsApp
+                    <input type="text" value="3150000000" placeholder="Número celular" />
+                  </label>
+                </div>
+                <label>
+                  Regla del sorteo
+                  <input type="text" value="Últimas dos cifras del premio mayor de la lotería del Valle" />
+                </label>
+                <div class="form-actions">
+                  <button type="button" class="ghost-btn">Guardar borrador</button>
+                  <button type="button" class="primary-btn glow-btn">🚀 Publicar rifa</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="preview-card">
+              <p class="eyebrow-tag">👁️ Vista previa</p>
+              <h4>Así se ve en celular</h4>
+              <div class="preview-phone">
+                <div class="preview-img"></div>
+                <div class="preview-body">
+                  <span class="pill-live" style="font-size:0.75rem">🟢 Activa</span>
+                  <h5>Freidora de aire Oster</h5>
+                  <p class="preview-price">$10.000 COP por número</p>
+                  <p class="preview-date">📅 Sorteo: 20 abril 2026</p>
+                  <p class="preview-rule">🎲 Lotería del Valle</p>
+                  <button class="primary-btn glow-btn full" style="margin-top:12px">Compartir rifa 🔗</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══════ VISTA PÚBLICA ═══════ -->
+        <section class="view" id="publica">
+          <div class="public-hero">
+            <div class="public-hero-content">
+              <span class="pill-live">🟢 Rifa activa</span>
+              <h3>Freidora de aire Oster</h3>
+              <p>Organizada por <strong>Tienda El Buen Gusto</strong> · $10.000 COP por número</p>
+            </div>
+            <button class="whatsapp-btn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              Hablar por WhatsApp
+            </button>
+          </div>
+
+          <div class="public-grid">
+            <div class="info-card">
+              <div class="info-row">
+                <span class="info-label">📅 Fecha del sorteo</span>
+                <strong>20 abril 2026</strong>
+              </div>
+              <div class="info-row">
+                <span class="info-label">🎲 Cómo se elige</span>
+                <strong>Últimas 2 cifras · Lotería del Valle</strong>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Estados</span>
+                <div class="legend-row">
+                  <span class="legend-item"><i class="dot-available"></i>Disponible</span>
+                  <span class="legend-item"><i class="dot-reserved"></i>Apartado</span>
+                  <span class="legend-item"><i class="dot-paid"></i>Pagado</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="reserve-card">
+              <p class="eyebrow-tag">🎟️ Apartar números</p>
+              <form class="reserve-form">
+                <label>
+                  Tu nombre
+                  <input type="text" placeholder="Escribe tu nombre" />
+                </label>
+                <label>
+                  Tu celular
+                  <input type="tel" placeholder="Ej: 3150000000" />
+                </label>
+                <label>
+                  Números elegidos
+                  <input type="text" value="08, 12, 24" />
+                </label>
+                <button type="button" class="primary-btn glow-btn full">Apartar ahora 🎉</button>
+              </form>
+            </div>
+          </div>
+
+          <div class="numbers-card">
+            <div class="numbers-head">
+              <div>
+                <p class="eyebrow-tag">🎯 Grilla de números</p>
+                <h4>Selecciona los que siguen libres</h4>
+              </div>
+              <span class="chip-tag">100 números</span>
+            </div>
+            <div class="number-grid" id="numberGrid">
+              <!-- Generado por JS -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══════ VISTA GESTIONAR ═══════ -->
+        <section class="view" id="gestionar">
+          <div class="view-head">
+            <div>
+              <p class="eyebrow-tag">⚙️ Control de rifa</p>
+              <h3>Gestionar números</h3>
+            </div>
+            <button class="ghost-btn">📋 Copiar link</button>
+          </div>
+
+          <div class="manage-stats">
+            <div class="stat-card">
+              <p class="stat-label">Disponibles</p>
+              <p class="stat-val green">20</p>
+            </div>
+            <div class="stat-card">
+              <p class="stat-label">Apartados</p>
+              <p class="stat-val amber">12</p>
+            </div>
+            <div class="stat-card">
+              <p class="stat-label">Pagados</p>
+              <p class="stat-val gold">68</p>
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Nombre</th>
+                    <th>Celular</th>
+                    <th>Estado</th>
+                    <th>Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>08</strong></td>
+                    <td>Maria Rojas</td>
+                    <td>3150001111</td>
+                    <td><span class="pill-soon">⏳ Apartado</span></td>
+                    <td><button class="action-btn green-btn">Marcar pagado</button></td>
+                  </tr>
+                  <tr>
+                    <td><strong>12</strong></td>
+                    <td>Carlos Vega</td>
+                    <td>3160002222</td>
+                    <td><span class="pill-live">✅ Pagado</span></td>
+                    <td><button class="action-btn gray-btn">Liberar</button></td>
+                  </tr>
+                  <tr>
+                    <td><strong>24</strong></td>
+                    <td>Luisa Gómez</td>
+                    <td>3170003333</td>
+                    <td><span class="pill-soon">⏳ Apartado</span></td>
+                    <td><button class="action-btn green-btn">Marcar pagado</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="result-card">
+            <div class="result-icon">🏆</div>
+            <div class="result-body">
+              <p class="eyebrow-tag">Cierre de rifa</p>
+              <h4>Publicar número ganador</h4>
+              <div class="input-row" style="margin-top:16px">
+                <label>
+                  Número ganador
+                  <input type="text" value="37" placeholder="Ej: 37" />
+                </label>
+                <label>
+                  Referencia del sorteo
+                  <input type="text" value="Lotería del Valle - premio mayor" />
+                </label>
+              </div>
+              <button class="primary-btn glow-btn" style="margin-top:16px">🎊 Cerrar y publicar resultado</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
