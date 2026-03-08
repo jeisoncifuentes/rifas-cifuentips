@@ -563,14 +563,25 @@
             </div>
           </div>
 
+          <div class="admin-toolbar">
+            <div class="search-wrap">
+              <input type="text" id="adminSearch" placeholder="🔍 Buscar por nombre, número o celular…" class="search-input" />
+            </div>
+            <div class="filter-tabs" id="filterTabs">
+              <button class="filter-tab active" data-filter="todos">Todos</button>
+              <button class="filter-tab" data-filter="Apartado">⏳ Apartado</button>
+              <button class="filter-tab" data-filter="Pagado">✅ Pagado</button>
+            </div>
+          </div>
+
           <div class="glass-card">
             <div class="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th>#</th>
-                    <th>Nombre</th>
-                    <th>Celular</th>
+                    <th class="sort-th" data-sort="num"># <span class="sort-ico">↕</span></th>
+                    <th class="sort-th" data-sort="nombre">Nombre <span class="sort-ico">↕</span></th>
+                    <th class="sort-th" data-sort="cel">Celular <span class="sort-ico">↕</span></th>
                     <th>Estado</th>
                     <th>Acción</th>
                   </tr>
