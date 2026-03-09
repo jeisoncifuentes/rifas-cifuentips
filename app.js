@@ -935,6 +935,8 @@ const DEFAULT_CONFIG = {
   whatsapp: "3150000000",
   regla:    "Últimas dos cifras del premio mayor de la lotería del Valle",
   imagen:   null,
+  tema:     "verde",
+  estiloGrid: "rounded",
 };
 
 let RIFA_CONFIG = { ...DEFAULT_CONFIG };
@@ -970,6 +972,43 @@ function loadConfig() {
   } catch { return null; }
 }
 
+
+/* ══════════════════════════════════════════════
+   SPRINT 4B — TEMAS Y ESTILOS DE GRILLA
+   ══════════════════════════════════════════════ */
+
+const THEMES = {
+  verde:   { hex: "#00e573", rgb: "0, 229, 115"   },
+  violeta: { hex: "#a855f7", rgb: "168, 85, 247"  },
+  dorado:  { hex: "#ffd60a", rgb: "255, 214, 10"  },
+  azul:    { hex: "#38bdf8", rgb: "56, 189, 248"  },
+  rosa:    { hex: "#f472b6", rgb: "244, 114, 182" },
+};
+
+function applyTheme(tema) {
+  const t = THEMES[tema] || THEMES["verde"];
+  const r = document.documentElement;
+  r.style.setProperty("--green",    t.hex);
+  r.style.setProperty("--green-rgb", t.rgb);
+  // Actualizar swatch activo
+  document.querySelectorAll(".swatch").forEach(s => {
+    s.classList.toggle("active", s.dataset.tema === tema);
+  });
+}
+
+function applyGridStyle(style) {
+  const grid = document.getElementById("numberGrid");
+  if (!grid) return;
+  grid.classList.remove("grid-pill", "grid-square", "grid-rounded");
+  if (style === "pill")   grid.classList.add("grid-pill");
+  if (style === "square") grid.classList.add("grid-square");
+  // rounded es el default
+  // Actualizar botón activo
+  document.querySelectorAll(".grid-style-opt").forEach(b => {
+    b.classList.toggle("active", b.dataset.style === style);
+  });
+}
+
 // ════════════════════════════
 // Aplicar configuración a la UI
 // ════════════════════════════
@@ -1002,6 +1041,10 @@ function applyConfig() {
 
   _applyHeroImage(c.imagen);
   _applyPreviewImage(c.imagen);
+
+  // Temas y estilos de grilla (Sprint 4B)
+  applyTheme(c.tema || "verde");
+  applyGridStyle(c.estiloGrid || "rounded");
 
   // Resetear countdown para que use la nueva fecha
   if (_cdInterval) { clearInterval(_cdInterval); _cdInterval = null; }
@@ -1227,6 +1270,30 @@ document.getElementById("gestionarTbody")?.addEventListener("dblclick", e => {
     if (ev.key === "Enter")  { ev.preventDefault(); input.blur(); }
     if (ev.key === "Escape") { input.value = current; input.blur(); }
   });
+});
+
+/* ══════════════════════════════════════════════
+   SPRINT 4B — LISTENERS TEMAS Y ESTILOS DE GRILLA
+   ══════════════════════════════════════════════ */
+
+// Swatch de colores
+document.getElementById("themeSwatches")?.addEventListener("click", e => {
+  const sw = e.target.closest(".swatch");
+  if (!sw) return;
+  const tema = sw.dataset.tema;
+  RIFA_CONFIG.tema = tema;
+  applyTheme(tema);
+  saveConfig();
+});
+
+// Estilo de grilla
+document.getElementById("gridStyleOpts")?.addEventListener("click", e => {
+  const btn = e.target.closest(".grid-style-opt");
+  if (!btn) return;
+  const style = btn.dataset.style;
+  RIFA_CONFIG.estiloGrid = style;
+  applyGridStyle(style);
+  saveConfig();
 });
 
 // ════════════════════════════
