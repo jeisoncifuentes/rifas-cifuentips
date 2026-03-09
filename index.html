@@ -366,6 +366,35 @@
                   Regla del sorteo
                   <input type="text" id="cfgRegla" value="Últimas dos cifras del premio mayor de la lotería del Valle" />
                 </label>
+
+                <!-- Sprint 4B: Tema de color -->
+                <div class="form-group">
+                  <p class="form-label-text">Color del tema</p>
+                  <div class="theme-swatches" id="themeSwatches">
+                    <button class="swatch active" data-tema="verde"  style="background:#00e573" title="Verde"></button>
+                    <button class="swatch"        data-tema="violeta" style="background:#a855f7" title="Violeta"></button>
+                    <button class="swatch"        data-tema="dorado"  style="background:#ffd60a" title="Dorado"></button>
+                    <button class="swatch"        data-tema="azul"    style="background:#38bdf8" title="Azul"></button>
+                    <button class="swatch"        data-tema="rosa"    style="background:#f472b6" title="Rosa"></button>
+                  </div>
+                </div>
+
+                <!-- Sprint 4B: Estilo de grilla -->
+                <div class="form-group">
+                  <p class="form-label-text">Estilo de grilla de números</p>
+                  <div class="grid-style-opts" id="gridStyleOpts">
+                    <button class="grid-style-opt active" data-style="rounded">
+                      <span class="gso-num">42</span>Redondeado
+                    </button>
+                    <button class="grid-style-opt" data-style="pill">
+                      <span class="gso-num" style="border-radius:999px;border:1px solid currentColor;padding:0 .3rem">42</span>Píldora
+                    </button>
+                    <button class="grid-style-opt" data-style="square">
+                      <span class="gso-num" style="border-radius:3px;border:1px solid currentColor;padding:0 .2rem">42</span>Cuadrado
+                    </button>
+                  </div>
+                </div>
+
                 <div class="form-group">
                   <p class="form-label-text">Imagen del premio (opcional)</p>
                   <div class="file-upload-wrap">
