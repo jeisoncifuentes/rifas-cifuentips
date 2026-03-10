@@ -242,13 +242,23 @@ function _spinDrum() {
       display.classList.remove("spinning");
       balls.forEach(b => b.classList.remove("orbiting"));
 
-      // Elegir ganador (todos los números del 00 al 99)
-      const winner = rnd();
-      display.textContent = winner;
+      // Elegir ganador — solo compradores Pagados (Sprint 5A)
+      const pagados = BUYERS.filter(b => b.estado === "Pagado");
+      if (pagados.length === 0) {
+        display.classList.remove("spinning", "winner-display");
+        display.textContent = "??";
+        _spinning = false;
+        document.getElementById("spinBtn").disabled = false;
+        document.getElementById("spinBtn").textContent = "🎰 ¡Girar la tómbola!";
+        closeWinnerModal();
+        showToast("⚠️ No hay compradores con estado Pagado para sortear", "error");
+        return;
+      }
+      const winner = pagados[Math.floor(Math.random() * pagados.length)];
+      display.textContent = winner.num.padStart(2, "0");
       display.classList.add("winner-display");
 
-      const buyer  = BUYERS.find(b => b.num === winner);
-      const person = buyer ? `${buyer.nombre}  ·  ${buyer.cel}` : "Número sin apartar";
+      const person = `${winner.nombre}  ·  ${winner.cel}`;
       document.getElementById("winnerPerson").textContent = person;
 
       setTimeout(() => {
@@ -264,18 +274,22 @@ function _spinDrum() {
 function _launchConfetti() {
   const container = document.getElementById("confettiContainer");
   container.innerHTML = "";
-  const colors = ["#00e573","#ffd60a","#fb923c","#38bdf8","#a78bfa","#ffffff","#ff6b6b"];
-  for (let i = 0; i < 70; i++) {
+  // Usar el color del tema activo como color principal
+  const themeHex = getComputedStyle(document.documentElement).getPropertyValue("--green").trim() || "#00e573";
+  const colors = [themeHex, "#ffd60a", "#fb923c", "#38bdf8", "#a78bfa", "#ffffff", "#ff6b6b"];
+  const shapes = ["50%", "2px", "0"];
+  for (let i = 0; i < 100; i++) {
     const el = document.createElement("div");
     el.className = "confetti-piece";
     el.style.cssText = `
       left:${Math.random() * 100}%;
       background:${colors[Math.floor(Math.random() * colors.length)]};
-      width:${4 + Math.random() * 5}px;
-      height:${7 + Math.random() * 9}px;
-      border-radius:${Math.random() > 0.5 ? "50%" : "2px"};
-      animation-delay:${Math.random() * 0.55}s;
-      animation-duration:${1.4 + Math.random() * 1.6}s;
+      width:${4 + Math.random() * 6}px;
+      height:${7 + Math.random() * 10}px;
+      border-radius:${shapes[Math.floor(Math.random() * shapes.length)]};
+      animation-delay:${Math.random() * 0.7}s;
+      animation-duration:${1.2 + Math.random() * 1.8}s;
+      opacity:${0.7 + Math.random() * 0.3};
     `;
     container.appendChild(el);
   }
@@ -283,6 +297,8 @@ function _launchConfetti() {
 
 // Eventos — winner modal
 document.getElementById("btnSortear")
+  ?.addEventListener("click", openWinnerModal);
+document.getElementById("btnSortearGestionar")
   ?.addEventListener("click", openWinnerModal);
 document.getElementById("closeWinner")
   ?.addEventListener("click", closeWinnerModal);
