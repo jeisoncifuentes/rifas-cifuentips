@@ -14,9 +14,34 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Unbounded:wght@700;900&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=7a" />
+    <!-- Sprint 6A: CSS crítico de modo compartido (inline para evitar caché) -->
+    <style id="share-mode-css">
+      .share-mode .sidebar        { display: none !important; }
+      .share-mode .topbar         { display: none !important; }
+      .share-mode .content        { padding: 3.5rem 0 0 0 !important; }
+      .share-mode .page-shell     { grid-template-columns: 1fr !important; }
+      .share-mode #inicio,
+      .share-mode #panel,
+      .share-mode #crear,
+      .share-mode #gestionar      { display: none !important; }
+      .share-mode #publica        { max-width: 700px; margin: 0 auto; padding: 1rem; }
+      .share-banner               { position:fixed;top:0;left:0;right:0;z-index:200;background:linear-gradient(90deg,#0d1220,#121826);border-bottom:1px solid rgba(255,255,255,.08);padding:.6rem 1.2rem; }
+      .share-banner-inner         { max-width:700px;margin:0 auto;display:flex;align-items:center;gap:.6rem; }
+      .share-banner-title         { flex:1;font-weight:700;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+      .share-banner-back          { font-size:.7rem;color:rgba(255,255,255,.4);text-decoration:none;border:1px solid rgba(255,255,255,.1);border-radius:.4rem;padding:.2rem .5rem; }
+    </style>
   </head>
   <body>
+    <!-- Banner modo público compartido — Sprint 6A -->
+    <div class="share-banner" id="shareBanner" style="display:none">
+      <div class="share-banner-inner">
+        <span class="share-banner-logo">⭐</span>
+        <span class="share-banner-title" id="shareBannerTitle">Rifa</span>
+        <a class="share-banner-back" href="?" title="Ver página completa">↗ Admin</a>
+      </div>
+    </div>
+
     <!-- Partículas de fondo -->
     <div class="bg-particles" aria-hidden="true">
       <span></span><span></span><span></span><span></span>
@@ -73,6 +98,10 @@
           <div class="topbar-left">
             <p class="topbar-eyebrow">Interfaz MVP</p>
             <h2 id="view-title">Inicio</h2>
+          </div>
+          <div class="topbar-rifa-badge" id="activeRifaBadge" style="display:none">
+            <span class="rifa-badge-dot">🟢</span>
+            <span class="rifa-badge-name" id="activeRifaName">—</span>
           </div>
           <div class="topbar-actions">
             <button class="ghost-btn" data-view-target="publica">Ver demo</button>
@@ -252,64 +281,34 @@
               <p class="eyebrow-tag">📊 Tu resumen</p>
               <h3>Tus rifas</h3>
             </div>
-            <button class="primary-btn glow-btn" data-view-target="crear">
+            <button class="primary-btn glow-btn new-rifa-btn" onclick="createNewRifa()">
               + Nueva rifa
             </button>
           </div>
 
-          <div class="stats-row">
+          <!-- Stats del panel — generadas por JS Sprint 7A -->
+          <div class="stats-row" id="panelStatsRow">
             <div class="stat-card">
-              <p class="stat-label">Rifas activas</p>
-              <p class="stat-val green">3</p>
+              <p class="stat-label">Rifas creadas</p>
+              <p class="stat-val green" id="panelTotalRifas">1</p>
             </div>
             <div class="stat-card">
               <p class="stat-label">Números pagados</p>
-              <p class="stat-val gold">81</p>
+              <p class="stat-val gold" id="panelTotalPagados">0</p>
             </div>
             <div class="stat-card">
               <p class="stat-label">Por cobrar</p>
-              <p class="stat-val amber">24</p>
+              <p class="stat-val amber" id="panelTotalApartados">0</p>
             </div>
             <div class="stat-card">
               <p class="stat-label">Ingresos estimados</p>
-              <p class="stat-val green">$810.000</p>
+              <p class="stat-val green" id="panelTotalIngresos">$0</p>
             </div>
           </div>
 
-          <div class="raffle-cards">
-            <div class="raffle-card">
-              <div class="raffle-card-top">
-                <span class="pill-live">🟢 Activa</span>
-                <span class="raffle-date">20 abril 2026</span>
-              </div>
-              <h4>Freidora de aire Oster</h4>
-              <p>100 números · $10.000 COP</p>
-              <div class="prog-bar">
-                <div class="prog-fill" style="width:68%"></div>
-              </div>
-              <div class="raffle-meta-row">
-                <span>✅ 68 vendidos</span>
-                <span>⏳ 12 apartados</span>
-              </div>
-              <button class="ghost-btn full" data-view-target="gestionar">Gestionar →</button>
-            </div>
-
-            <div class="raffle-card">
-              <div class="raffle-card-top">
-                <span class="pill-soon">🟡 Próxima</span>
-                <span class="raffle-date">30 abril 2026</span>
-              </div>
-              <h4>Mercado familiar</h4>
-              <p>50 números · $5.000 COP</p>
-              <div class="prog-bar">
-                <div class="prog-fill amber-fill" style="width:24%"></div>
-              </div>
-              <div class="raffle-meta-row">
-                <span>✅ 12 vendidos</span>
-                <span>⏳ 4 apartados</span>
-              </div>
-              <button class="ghost-btn full" data-view-target="gestionar">Gestionar →</button>
-            </div>
+          <!-- Cards de rifas — generadas por JS Sprint 7A -->
+          <div class="raffle-cards" id="rifaCards">
+            <!-- Generado dinámicamente por renderPanelCards() -->
           </div>
         </section>
 
@@ -328,47 +327,84 @@
               <form class="raffle-form" autocomplete="off">
                 <label>
                   Nombre de la rifa
-                  <input type="text" value="Freidora de aire Oster" placeholder="Ej: Freidora de aire Oster" />
+                  <input type="text" id="cfgNombre" value="Freidora de aire Oster" placeholder="Ej: Freidora de aire Oster" />
                 </label>
                 <label>
                   Premio
-                  <input type="text" value="Freidora de aire de 4 litros" placeholder="Describe el premio" />
+                  <input type="text" id="cfgPremio" value="Freidora de aire de 4 litros" placeholder="Describe el premio" />
                 </label>
                 <label>
                   Descripción
-                  <textarea rows="3" placeholder="Cuéntale a los participantes sobre la rifa...">Rifa para impulsar ventas del negocio. El ganador se define con las últimas dos cifras de la lotería del Valle.</textarea>
+                  <textarea id="cfgDesc" rows="3" placeholder="Cuéntale a los participantes sobre la rifa...">Rifa para impulsar ventas del negocio. El ganador se define con las últimas dos cifras de la lotería del Valle.</textarea>
                 </label>
                 <div class="input-row">
                   <label>
                     Cantidad de números
-                    <select>
-                      <option>50 números</option>
-                      <option selected>100 números</option>
-                      <option>200 números</option>
+                    <select id="cfgTotal">
+                      <option value="50">50 números</option>
+                      <option value="100" selected>100 números</option>
+                      <option value="200">200 números</option>
                     </select>
                   </label>
                   <label>
                     Precio por número (COP)
-                    <input type="text" value="10000" />
+                    <input type="text" id="cfgPrecio" value="10000" />
                   </label>
                 </div>
                 <div class="input-row">
                   <label>
                     Fecha del sorteo
-                    <input type="date" value="2026-04-20" />
+                    <input type="date" id="cfgFecha" value="2026-04-20" />
                   </label>
                   <label>
                     Contacto WhatsApp
-                    <input type="text" value="3150000000" placeholder="Número celular" />
+                    <input type="text" id="cfgWa" value="3150000000" placeholder="Número celular" />
                   </label>
                 </div>
                 <label>
                   Regla del sorteo
-                  <input type="text" value="Últimas dos cifras del premio mayor de la lotería del Valle" />
+                  <input type="text" id="cfgRegla" value="Últimas dos cifras del premio mayor de la lotería del Valle" />
                 </label>
+
+                <!-- Sprint 4B: Tema de color -->
+                <div class="form-group">
+                  <p class="form-label-text">Color del tema</p>
+                  <div class="theme-swatches" id="themeSwatches">
+                    <button class="swatch active" data-tema="verde"  style="background:#00e573" title="Verde"></button>
+                    <button class="swatch"        data-tema="violeta" style="background:#a855f7" title="Violeta"></button>
+                    <button class="swatch"        data-tema="dorado"  style="background:#ffd60a" title="Dorado"></button>
+                    <button class="swatch"        data-tema="azul"    style="background:#38bdf8" title="Azul"></button>
+                    <button class="swatch"        data-tema="rosa"    style="background:#f472b6" title="Rosa"></button>
+                  </div>
+                </div>
+
+                <!-- Sprint 4B: Estilo de grilla -->
+                <div class="form-group">
+                  <p class="form-label-text">Estilo de grilla de números</p>
+                  <div class="grid-style-opts" id="gridStyleOpts">
+                    <button class="grid-style-opt active" data-style="rounded">
+                      <span class="gso-num">42</span>Redondeado
+                    </button>
+                    <button class="grid-style-opt" data-style="pill">
+                      <span class="gso-num" style="border-radius:999px;border:1px solid currentColor;padding:0 .3rem">42</span>Píldora
+                    </button>
+                    <button class="grid-style-opt" data-style="square">
+                      <span class="gso-num" style="border-radius:3px;border:1px solid currentColor;padding:0 .2rem">42</span>Cuadrado
+                    </button>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <p class="form-label-text">Imagen del premio (opcional)</p>
+                  <div class="file-upload-wrap">
+                    <input type="file" id="cfgImagen" accept="image/*" class="file-input-hidden" />
+                    <label for="cfgImagen" class="ghost-btn" style="cursor:pointer">📸 Subir foto del premio</label>
+                    <span class="file-name-hint" id="cfgImagenHint">Sin imagen</span>
+                  </div>
+                </div>
                 <div class="form-actions">
-                  <button type="button" class="ghost-btn">Guardar borrador</button>
-                  <button type="button" class="primary-btn glow-btn">🚀 Publicar rifa</button>
+                  <button type="button" class="ghost-btn" id="btnBorrador">💾 Guardar borrador</button>
+                  <button type="button" class="primary-btn glow-btn" id="btnPublicar">🚀 Publicar rifa</button>
                 </div>
               </form>
             </div>
@@ -377,12 +413,12 @@
               <p class="eyebrow-tag">👁️ Vista previa</p>
               <h4>Así se ve en celular</h4>
               <div class="preview-phone">
-                <div class="preview-img"></div>
+                <div class="preview-img" id="prevImagen"></div>
                 <div class="preview-body">
                   <span class="pill-live" style="font-size:0.75rem">🟢 Activa</span>
-                  <h5>Freidora de aire Oster</h5>
-                  <p class="preview-price">$10.000 COP por número</p>
-                  <p class="preview-date">📅 Sorteo: 20 abril 2026</p>
+                  <h5 id="prevNombre">Freidora de aire Oster</h5>
+                  <p class="preview-price" id="prevPrecio">$10.000 COP por número</p>
+                  <p class="preview-date" id="prevFecha">📅 Sorteo: 20 abril 2026</p>
                   <p class="preview-rule">🎲 Lotería del Valle</p>
                   <button class="primary-btn glow-btn full" style="margin-top:12px">Compartir rifa 🔗</button>
                 </div>
@@ -396,20 +432,87 @@
           <div class="public-hero">
             <div class="public-hero-content">
               <span class="pill-live">🟢 Rifa activa</span>
-              <h3>Freidora de aire Oster</h3>
-              <p>Organizada por <strong>Tienda El Buen Gusto</strong> · $10.000 COP por número</p>
+              <h3 id="heroRifaNombre">Freidora de aire Oster</h3>
+              <p id="heroRifaSub">Organizada por <strong>Tienda El Buen Gusto</strong> · $10.000 COP por número</p>
             </div>
+            <div class="hero-prize-img" id="heroPrizeImg"></div>
             <button class="whatsapp-btn">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
               Hablar por WhatsApp
             </button>
           </div>
 
+          <!-- ═══ SPRINT 2: Countdown + Progress + Viral Share ═══ -->
+
+          <!-- ⏳ Conteo regresivo -->
+          <div class="countdown-strip">
+            <div class="cd-label">
+              <p class="eyebrow-tag" style="margin-bottom:2px">⏳ Tiempo restante</p>
+              <p class="cd-date" id="cdDate">Sorteo: 20 de abril · Lotería del Valle</p>
+            </div>
+            <div class="countdown-row">
+              <div class="flip-card">
+                <span class="flip-num" id="cdDays">--</span>
+                <span class="flip-label">Días</span>
+              </div>
+              <span class="flip-sep">:</span>
+              <div class="flip-card">
+                <span class="flip-num" id="cdHours">--</span>
+                <span class="flip-label">Horas</span>
+              </div>
+              <span class="flip-sep">:</span>
+              <div class="flip-card">
+                <span class="flip-num" id="cdMins">--</span>
+                <span class="flip-label">Min</span>
+              </div>
+              <span class="flip-sep">:</span>
+              <div class="flip-card flip-secs">
+                <span class="flip-num" id="cdSecs">--</span>
+                <span class="flip-label">Seg</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 📊 Barra de progreso animada -->
+          <div class="sold-strip">
+            <div class="sold-head">
+              <div>
+                <p class="eyebrow-tag" style="margin-bottom:2px">📊 Disponibilidad de números</p>
+                <p class="sold-count" id="soldCount">0 / 100 vendidos</p>
+              </div>
+              <span class="sold-pct" id="soldPct">0%</span>
+            </div>
+            <div class="sold-track">
+              <div class="sold-fill" id="soldFill"></div>
+            </div>
+            <div class="sold-footer">
+              <div class="sold-legend">
+                <span id="legendPaid"><i class="dot-paid"></i> Pagados: 68</span>
+                <span id="legendReserved"><i class="dot-reserved"></i> Apartados: 12</span>
+                <span id="legendAvailable"><i class="dot-available"></i> Libres: 20</span>
+              </div>
+              <span class="sold-alert" id="soldAlert"></span>
+            </div>
+          </div>
+
+          <!-- 📣 Compartir rifa -->
+          <div class="viral-strip">
+            <p class="viral-label">📣 ¿Conoces a alguien que quiera un número?</p>
+              <p class="share-count" id="shareCount" style="display:none;font-size:.75rem;color:var(--ink-2);margin-bottom:.25rem;"></p>
+            <div class="viral-btns">
+              <button class="whatsapp-btn" id="btnShareRifa">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                Compartir por WhatsApp
+              </button>
+              <button class="ghost-btn" id="btnCopyRifaLink">📋 Copiar link</button>
+            </div>
+          </div>
+
           <div class="public-grid">
             <div class="info-card">
               <div class="info-row">
                 <span class="info-label">📅 Fecha del sorteo</span>
-                <strong>20 abril 2026</strong>
+                <strong id="infoFecha">20 abril 2026</strong>
               </div>
               <div class="info-row">
                 <span class="info-label">🎲 Cómo se elige</span>
@@ -440,7 +543,8 @@
                   Números elegidos
                   <input type="text" value="08, 12, 24" />
                 </label>
-                <button type="button" class="primary-btn glow-btn full">Apartar ahora 🎉</button>
+                <button type="button" class="primary-btn glow-btn full" id="btnApartar">Apartar ahora 🎉</button>
+                <button type="button" class="ghost-btn full" id="btnTicket">🎟️ Generar ticket para WhatsApp</button>
               </form>
             </div>
           </div>
@@ -466,21 +570,37 @@
               <p class="eyebrow-tag">⚙️ Control de rifa</p>
               <h3>Gestionar números</h3>
             </div>
-            <button class="ghost-btn">📋 Copiar link</button>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="ghost-btn" id="btnExportCSV">📤 Exportar CSV</button>
+              <button class="ghost-btn" id="btnCopyGestionar">📋 Copiar link</button>
+              <button class="ghost-btn" id="btnResetDemo" style="color:var(--amber)">🗑️ Limpiar datos</button>
+              <button class="primary-btn" id="btnSortearGestionar" style="background:linear-gradient(135deg,#ffd60a,#c9930a);color:#000;font-weight:700;">🎰 Sortear</button>
+            </div>
           </div>
 
           <div class="manage-stats">
             <div class="stat-card">
               <p class="stat-label">Disponibles</p>
-              <p class="stat-val green">20</p>
+              <p class="stat-val green" id="statDisp">20</p>
             </div>
             <div class="stat-card">
               <p class="stat-label">Apartados</p>
-              <p class="stat-val amber">12</p>
+              <p class="stat-val amber" id="statApart">12</p>
             </div>
             <div class="stat-card">
               <p class="stat-label">Pagados</p>
-              <p class="stat-val gold">68</p>
+              <p class="stat-val gold" id="statPagados">68</p>
+            </div>
+          </div>
+
+          <div class="admin-toolbar">
+            <div class="search-wrap">
+              <input type="text" id="adminSearch" placeholder="🔍 Buscar por nombre, número o celular…" class="search-input" />
+            </div>
+            <div class="filter-tabs" id="filterTabs">
+              <button class="filter-tab active" data-filter="todos">Todos</button>
+              <button class="filter-tab" data-filter="Apartado">⏳ Apartado</button>
+              <button class="filter-tab" data-filter="Pagado">✅ Pagado</button>
             </div>
           </div>
 
@@ -489,35 +609,15 @@
               <table>
                 <thead>
                   <tr>
-                    <th>#</th>
-                    <th>Nombre</th>
-                    <th>Celular</th>
+                    <th class="sort-th" data-sort="num"># <span class="sort-ico">↕</span></th>
+                    <th class="sort-th" data-sort="nombre">Nombre <span class="sort-ico">↕</span></th>
+                    <th class="sort-th" data-sort="cel">Celular <span class="sort-ico">↕</span></th>
                     <th>Estado</th>
                     <th>Acción</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr>
-                    <td><strong>08</strong></td>
-                    <td>Maria Rojas</td>
-                    <td>3150001111</td>
-                    <td><span class="pill-soon">⏳ Apartado</span></td>
-                    <td><button class="action-btn green-btn">Marcar pagado</button></td>
-                  </tr>
-                  <tr>
-                    <td><strong>12</strong></td>
-                    <td>Carlos Vega</td>
-                    <td>3160002222</td>
-                    <td><span class="pill-live">✅ Pagado</span></td>
-                    <td><button class="action-btn gray-btn">Liberar</button></td>
-                  </tr>
-                  <tr>
-                    <td><strong>24</strong></td>
-                    <td>Luisa Gómez</td>
-                    <td>3170003333</td>
-                    <td><span class="pill-soon">⏳ Apartado</span></td>
-                    <td><button class="action-btn green-btn">Marcar pagado</button></td>
-                  </tr>
+                <tbody id="gestionarTbody">
+                  <!-- Renderizado dinámico desde JS (Sprint 3B) -->
                 </tbody>
               </table>
             </div>
@@ -538,11 +638,109 @@
                   <input type="text" value="Lotería del Valle - premio mayor" />
                 </label>
               </div>
-              <button class="primary-btn glow-btn" style="margin-top:16px">🎊 Cerrar y publicar resultado</button>
+              <div class="form-actions" style="margin-top:16px;justify-content:flex-start;gap:10px;">
+                <button class="primary-btn large-btn" id="btnSortear" style="background:linear-gradient(135deg,#ffd60a,#c9930a);color:#000;box-shadow:0 4px 20px rgba(255,214,10,0.4);">🎰 Sortear ganador</button>
+                <button class="primary-btn glow-btn large-btn">🎊 Publicar resultado</button>
+              </div>
             </div>
           </div>
         </section>
       </main>
+    </div>
+
+    <!-- ═══════════════ MODAL: GENERADOR DE GANADOR ═══════════════ -->
+    <div class="modal-overlay" id="winnerModal" role="dialog" aria-modal="true" aria-label="Generador de ganador">
+      <div class="modal-box winner-modal">
+        <button class="modal-close" id="closeWinner" aria-label="Cerrar">✕</button>
+        <p class="eyebrow-tag">🎰 Sortear ganador</p>
+        <h3 class="modal-title">Freidora de aire Oster</h3>
+
+        <div class="drum-stage">
+          <div class="drum-balls-ring" id="drumRing">
+            <div class="drum-ball">07</div>
+            <div class="drum-ball">24</div>
+            <div class="drum-ball">55</div>
+            <div class="drum-ball">88</div>
+          </div>
+          <div class="drum-display" id="drumDisplay">??</div>
+        </div>
+
+        <div class="winner-reveal" id="winnerReveal">
+          <div class="winner-trophy">🏆</div>
+          <p class="winner-label">¡Número ganador!</p>
+          <p class="winner-person" id="winnerPerson"></p>
+          <button class="whatsapp-btn" id="btnShareResult" style="margin-top:8px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Compartir resultado
+          </button>
+        </div>
+
+        <div class="drum-controls">
+          <button class="primary-btn large-btn" id="spinBtn" style="background:linear-gradient(135deg,#ffd60a,#c9930a);color:#000;box-shadow:0 4px 20px rgba(255,214,10,0.45);">
+            🎰 ¡Girar la tómbola!
+          </button>
+          <button class="ghost-btn large-btn" id="resetDrumBtn" style="display:none">↺ Nuevo sorteo</button>
+        </div>
+
+        <div class="confetti-container" id="confettiContainer"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ MODAL: TICKET WHATSAPP ═══════════════ -->
+    <div class="modal-overlay" id="ticketModal" role="dialog" aria-modal="true" aria-label="Ticket de apartado">
+      <div class="modal-box ticket-modal">
+        <button class="modal-close" id="closeTicket" aria-label="Cerrar">✕</button>
+        <p class="eyebrow-tag">🎟️ Ticket de apartado</p>
+        <h3 class="modal-title">Comprobante listo para compartir</h3>
+        <p style="font-size:0.85rem;color:var(--text-3);margin-bottom:16px">Descárgalo o compártelo directamente por WhatsApp</p>
+        <canvas id="ticketCanvas" class="ticket-canvas"></canvas>
+        <div class="ticket-actions">
+          <button class="ghost-btn" id="btnDownloadTicket">⬇️ Descargar imagen</button>
+          <button class="whatsapp-btn" id="btnShareTicket">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Compartir por WhatsApp
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ MODAL DE PAGO WHATSAPP — Sprint 5D ═══════ -->
+    <div class="modal-overlay" id="paymentModal" role="dialog" aria-modal="true" aria-label="Confirmar pago">
+      <div class="modal-box payment-modal">
+        <button class="modal-close" id="btnClosePayment" aria-label="Cerrar">✕</button>
+        <p class="eyebrow-tag">💰 Confirmar apartado</p>
+        <h3 class="modal-title">¡Número(s) reservado(s)!</h3>
+        <p style="font-size:0.85rem;color:var(--ink-2);margin-bottom:18px">Envía tu confirmación de pago al organizador por WhatsApp</p>
+
+        <div class="payment-summary">
+          <div class="pay-row">
+            <span class="pay-label">👤 Nombre</span>
+            <span class="pay-val" id="payNombre">—</span>
+          </div>
+          <div class="pay-row">
+            <span class="pay-label">📱 Celular</span>
+            <span class="pay-val" id="payCel">—</span>
+          </div>
+          <div class="pay-row">
+            <span class="pay-label">🔢 Número(s)</span>
+            <span class="pay-val" id="payNums">—</span>
+          </div>
+          <div class="pay-row pay-row-total">
+            <span class="pay-label">💰 Total</span>
+            <span class="pay-val pay-total" id="payPrecio">—</span>
+          </div>
+        </div>
+
+        <div class="payment-instruction">
+          <p>📲 Contáctanos al <strong id="payOrgWa">—</strong> para confirmar tu pago</p>
+        </div>
+
+        <button class="whatsapp-btn full-wa" id="btnConfirmPayWa">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Enviar confirmación de pago
+        </button>
+        <button class="ghost-btn" style="width:100%;margin-top:8px" id="btnClosePayment2">Cerrar</button>
+      </div>
     </div>
 
     <script src="app.js"></script>
