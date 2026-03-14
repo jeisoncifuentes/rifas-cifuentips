@@ -2337,3 +2337,151 @@ td strong { color: var(--text); }
 
 /* La vista pública ocupa todo el ancho */
 .share-mode #publica { max-width: 700px; margin: 0 auto; padding: 1rem; }
+
+
+/* ══════════════════════════════════════════════
+   SPRINT 7A — MÚLTIPLES RIFAS
+   ══════════════════════════════════════════════ */
+
+/* Topbar badge — rifa activa */
+.topbar-rifa-badge {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  background: rgba(0,180,90,.12);
+  border: 1px solid rgba(0,180,90,.35);
+  border-radius: 2rem;
+  padding: .22rem .75rem;
+  font-size: .72rem;
+  color: var(--green);
+  white-space: nowrap;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.topbar-rifa-badge::before {
+  content: "🎰";
+  font-size: .8rem;
+}
+#activeRifaName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Pills de estado en las tarjetas */
+.pill-live {
+  display: inline-block;
+  background: rgba(0,180,90,.18);
+  color: var(--green);
+  border: 1px solid var(--green);
+  border-radius: 1rem;
+  padding: .15rem .55rem;
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.pill-draft {
+  display: inline-block;
+  background: rgba(255,255,255,.05);
+  color: var(--ink-3);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 1rem;
+  padding: .15rem .55rem;
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+/* Tarjetas de rifa en el panel */
+.raffle-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: .85rem;
+  padding: 1.1rem 1.2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+  transition: border-color .2s, box-shadow .2s;
+}
+.raffle-card:hover {
+  border-color: rgba(0,180,90,.3);
+  box-shadow: 0 4px 18px rgba(0,0,0,.25);
+}
+.raffle-card-active {
+  border-color: rgba(0,180,90,.55) !important;
+  box-shadow: 0 0 0 2px rgba(0,180,90,.15);
+}
+.raffle-card-top {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.raffle-date {
+  margin-left: auto;
+  font-size: .72rem;
+  color: var(--ink-3);
+}
+.raffle-card h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.25;
+}
+.raffle-card p {
+  margin: 0;
+  font-size: .8rem;
+  color: var(--ink-2);
+}
+.raffle-meta-row {
+  display: flex;
+  gap: 1rem;
+  font-size: .78rem;
+  color: var(--ink-2);
+}
+
+/* Botón eliminar rifa */
+.rifa-del-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--ink-3);
+  padding: .1rem .25rem;
+  border-radius: .3rem;
+  line-height: 1;
+  transition: color .15s, background .15s;
+  margin-left: auto;
+}
+.rifa-del-btn:hover {
+  color: #ff5555;
+  background: rgba(255,80,80,.1);
+}
+
+/* Grid de tarjetas de rifa */
+#rifaCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* Botón crear nueva rifa */
+.new-rifa-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  background: var(--green);
+  color: #000;
+  border: none;
+  border-radius: .55rem;
+  padding: .55rem 1.1rem;
+  font-size: .85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity .15s, transform .1s;
+}
+.new-rifa-btn:hover { opacity: .88; transform: translateY(-1px); }
+.new-rifa-btn:active { transform: translateY(0); }

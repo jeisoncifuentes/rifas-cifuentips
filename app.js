@@ -919,27 +919,44 @@ document.getElementById("gestionarTbody")
 // initApp — carga estado y arranca la UI
 // ════════════════════════════
 function initApp() {
-  // Sprint 3C: cargar configuración de rifa
-  const savedCfg = loadConfig();
-  if (savedCfg) Object.assign(RIFA_CONFIG, savedCfg);
+  // Sprint 7A: migración automática v1->v2 o carga desde RIFAS array
+  var rifasRaw = null;
+  try { rifasRaw = localStorage.getItem(RIFAS_KEY); } catch(e) {}
+  if (!rifasRaw) {
+    var oldState  = null;
+    var oldConfig = null;
+    try { oldState  = localStorage.getItem("rifas-cifuentips-v1"); } catch(e) {}
+    try { oldConfig = localStorage.getItem("rifas-config-v1"); } catch(e) {}
+    if (oldState || oldConfig) {
+      _migrateV1();
+    } else {
+      var firstRifa = {
+        id: _rifaId(),
+        config:       Object.assign({}, DEFAULT_CONFIG),
+        buyers:       [],
+        numberStates: {},
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      saveRifas([firstRifa]);
+      setActiveId(firstRifa.id);
+    }
+  }
+  _loadActiveRifaIntoState();
 
   // Sprint 6A: si hay config en la URL (#c=BASE64), usarla (override)
   if (window._sharedConfig) {
     Object.assign(RIFA_CONFIG, window._sharedConfig);
   }
 
-  const saved = loadState();
-  if (saved?.buyers && saved?.numberStates) {
-    BUYERS.length = 0;
-    BUYERS.push(...saved.buyers);
-    Object.assign(numberStates, saved.numberStates);
-  }
   buildNumberGrid();
   renderGestionar();
   updateManageStats();
   updateProgressLegend();
   applyConfig();        // Sprint 3C
   populateCrearForm();  // Sprint 3C
+  renderPanelCards();        // Sprint 7A
+  _updateActiveRifaBadge(); // Sprint 7A
 
   // Sprint 6A: modo compartido — ir directo a vista pública
   if (window._shareMode) {
@@ -1302,6 +1319,195 @@ document.getElementById("gestionarTbody")?.addEventListener("dblclick", e => {
     if (ev.key === "Escape") { input.value = current; input.blur(); }
   });
 });
+
+/* ══════════════════════════════════════════════
+   SPRINT 7A — MÚLTIPLES RIFAS
+   ══════════════════════════════════════════════ */
+
+const RIFAS_KEY  = "rifas-list-v2";
+const ACTIVE_KEY = "rifas-active-v2";
+
+function _rifaId()  { return "r_" + Date.now(); }
+
+function _fmtDateShort(iso) {
+  try { return new Date(iso + "T12:00:00").toLocaleDateString("es-CO", {day:"numeric",month:"short",year:"numeric"}); }
+  catch(e) { return iso; }
+}
+
+function loadRifas() {
+  try { var raw = localStorage.getItem(RIFAS_KEY); return raw ? JSON.parse(raw) : null; }
+  catch(e) { return null; }
+}
+
+function saveRifas(rifas) {
+  try { localStorage.setItem(RIFAS_KEY, JSON.stringify(rifas)); }
+  catch(e) { console.warn("saveRifas:", e); }
+}
+
+function getActiveId()    { return localStorage.getItem(ACTIVE_KEY) || null; }
+function setActiveId(id)  { localStorage.setItem(ACTIVE_KEY, id); }
+
+function saveActiveRifa() {
+  var rifas = loadRifas(); if (!rifas) return;
+  var id  = getActiveId();
+  var idx = rifas.findIndex(function(r) { return r.id === id; });
+  if (idx < 0) return;
+  var ns = {};
+  Object.keys(numberStates).forEach(function(k) {
+    ns[k] = numberStates[k] === "selected" ? "available" : numberStates[k];
+  });
+  rifas[idx].config       = Object.assign({}, RIFA_CONFIG);
+  rifas[idx].buyers       = BUYERS.slice();
+  rifas[idx].numberStates = ns;
+  rifas[idx].updatedAt    = new Date().toISOString();
+  saveRifas(rifas);
+}
+
+function _migrateV1() {
+  var raw   = localStorage.getItem("rifas-cifuentips-v1");
+  var cfg   = localStorage.getItem("rifas-config-v1");
+  var state = raw ? JSON.parse(raw) : null;
+  var config= cfg ? JSON.parse(cfg) : null;
+  var rifa  = {
+    id: _rifaId(),
+    config:       Object.assign({}, DEFAULT_CONFIG, config || {}),
+    buyers:       (state && state.buyers)       ? state.buyers       : [],
+    numberStates: (state && state.numberStates) ? state.numberStates : {},
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  var rifas = [rifa];
+  saveRifas(rifas);
+  setActiveId(rifa.id);
+  console.log("Sprint 7A: migracion v1->v2, id=" + rifa.id);
+  return rifas;
+}
+
+function _loadActiveRifaIntoState() {
+  var rifas = loadRifas() || [];
+  var id    = getActiveId();
+  var rifa  = rifas.find(function(r) { return r.id === id; }) || rifas[0];
+  if (!rifa) return;
+  Object.assign(RIFA_CONFIG, DEFAULT_CONFIG, rifa.config || {});
+  BUYERS.length = 0;
+  Array.prototype.push.apply(BUYERS, rifa.buyers || []);
+  Object.keys(numberStates).forEach(function(k) { delete numberStates[k]; });
+  Object.assign(numberStates, rifa.numberStates || {});
+}
+
+function activateRifa(id) {
+  saveActiveRifa();
+  setActiveId(id);
+  _loadActiveRifaIntoState();
+  renderAll7a();
+  showToast("🎰 Rifa activada");
+}
+
+function createNewRifa() {
+  saveActiveRifa();
+  var rifa = {
+    id: _rifaId(),
+    config:       Object.assign({}, DEFAULT_CONFIG),
+    buyers:       [],
+    numberStates: {},
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  var rifas = loadRifas() || [];
+  rifas.push(rifa);
+  saveRifas(rifas);
+  setActiveId(rifa.id);
+  _loadActiveRifaIntoState();
+  renderAll7a();
+  switchView("crear");
+  showToast("Nueva rifa creada — configúrala ahora");
+}
+
+function deleteRifa(id) {
+  var rifas = loadRifas() || [];
+  if (rifas.length <= 1) { showToast("Debes tener al menos una rifa", "error"); return; }
+  if (!window.confirm("Eliminar esta rifa? No se puede deshacer.")) return;
+  rifas = rifas.filter(function(r) { return r.id !== id; });
+  saveRifas(rifas);
+  if (getActiveId() === id) {
+    setActiveId(rifas[0].id);
+    _loadActiveRifaIntoState();
+  }
+  renderAll7a();
+  showToast("Rifa eliminada");
+}
+
+function renderAll7a() {
+  buildNumberGrid();
+  renderGestionar();
+  updateManageStats();
+  updateProgressLegend();
+  applyConfig();
+  populateCrearForm();
+  renderPanelCards();
+  _updateActiveRifaBadge();
+}
+
+function _updateActiveRifaBadge() {
+  var badge = document.getElementById("activeRifaBadge");
+  var name  = document.getElementById("activeRifaName");
+  if (!badge || !name) return;
+  var rifas = loadRifas() || [];
+  name.textContent = RIFA_CONFIG.nombre || "Rifa";
+  badge.style.display = rifas.length > 1 ? "" : "none";
+}
+
+function renderPanelCards() {
+  var container = document.getElementById("rifaCards");
+  if (!container) return;
+  var rifas    = loadRifas() || [];
+  var activeId = getActiveId();
+  var totalPagados = 0, totalApartados = 0, totalIngresos = 0;
+  rifas.forEach(function(r) {
+    var buyers = r.buyers || [];
+    var pag  = buyers.filter(function(b) { return b.estado === "Pagado"; }).length;
+    var apt  = buyers.filter(function(b) { return b.estado === "Apartado"; }).length;
+    totalPagados   += pag;
+    totalApartados += apt;
+    totalIngresos  += pag * ((r.config && r.config.precio) || 0);
+  });
+  var e = function(id) { return document.getElementById(id); };
+  if (e("panelTotalRifas"))    e("panelTotalRifas").textContent    = rifas.length;
+  if (e("panelTotalPagados"))  e("panelTotalPagados").textContent  = totalPagados;
+  if (e("panelTotalApartados"))e("panelTotalApartados").textContent= totalApartados;
+  if (e("panelTotalIngresos")) e("panelTotalIngresos").textContent = "$" + Number(totalIngresos).toLocaleString("es-CO");
+
+  container.innerHTML = rifas.map(function(r) {
+    var c  = r.config || {};
+    var buyers = r.buyers || [];
+    var total  = c.total || 100;
+    var pag    = buyers.filter(function(b) { return b.estado === "Pagado"; }).length;
+    var apt    = buyers.filter(function(b) { return b.estado === "Apartado"; }).length;
+    var pct    = Math.round((pag / total) * 100);
+    var isActive = r.id === activeId;
+    var badge  = isActive ? '<span class="pill-live">Activa</span>' : '<span class="pill-draft">Inactiva</span>';
+    var fecha  = c.fecha ? _fmtDateShort(c.fecha) : "Sin fecha";
+    var actBtn = isActive
+      ? '<button class="ghost-btn full" onclick="switchView(\'gestionar\')">Gestionar &rarr;</button>'
+      : '<button class="ghost-btn full" onclick="activateRifa(\'' + r.id + '\')">Activar &rarr;</button>';
+    var delBtn = '<button class="rifa-del-btn" onclick="deleteRifa(\'' + r.id + '\')" title="Eliminar">&#x1F5D1;</button>';
+    return '<div class="raffle-card' + (isActive ? ' raffle-card-active' : '') + '">'
+      + '<div class="raffle-card-top">' + badge + '<span class="raffle-date">' + fecha + '</span>' + delBtn + '</div>'
+      + '<h4>' + (c.nombre || "Nueva rifa") + '</h4>'
+      + '<p>' + total + ' n\xfameros &middot; $' + Number(c.precio || 0).toLocaleString("es-CO") + ' COP</p>'
+      + '<div class="prog-bar"><div class="prog-fill" style="width:' + pct + '%"></div></div>'
+      + '<div class="raffle-meta-row"><span>\u2705 ' + pag + ' pagados</span><span>\u23F3 ' + apt + ' apartados</span></div>'
+      + actBtn + '</div>';
+  }).join("");
+}
+
+// Patch saveState / saveConfig para también sincronizar RIFAS array
+(function() {
+  var _origSaveState  = saveState;
+  var _origSaveConfig = saveConfig;
+  saveState  = function() { _origSaveState();  saveActiveRifa(); };
+  saveConfig = function() { _origSaveConfig(); saveActiveRifa(); };
+})();
 
 /* ══════════════════════════════════════════════
    SPRINT 6A — VISTA PÚBLICA COMPARTIBLE
