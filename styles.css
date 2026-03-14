@@ -2204,3 +2204,75 @@ td strong { color: var(--text); }
 #numberGrid.grid-square .grid-number {
   border-radius: 4px;
 }
+
+/* ══════ SPRINT 5D — MODAL DE PAGO WHATSAPP ══════ */
+
+.payment-modal {
+  max-width: 400px;
+}
+
+.payment-summary {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: .75rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.pay-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: .85rem;
+  gap: .5rem;
+}
+
+.pay-row-total {
+  border-top: 1px solid var(--border);
+  padding-top: .5rem;
+  margin-top: .25rem;
+}
+
+.pay-label {
+  color: var(--ink-2);
+  flex-shrink: 0;
+}
+
+.pay-val {
+  color: var(--ink);
+  font-weight: 600;
+  text-align: right;
+  word-break: break-all;
+}
+
+.pay-total {
+  color: var(--green);
+  font-size: 1rem;
+}
+
+.payment-instruction {
+  background: rgba(var(--green-rgb), 0.08);
+  border: 1px solid rgba(var(--green-rgb), 0.2);
+  border-radius: .6rem;
+  padding: .7rem 1rem;
+  font-size: .83rem;
+  color: var(--ink-2);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.payment-instruction strong {
+  color: var(--green);
+  font-family: "Space Grotesk", sans-serif;
+}
+
+.full-wa {
+  width: 100%;
+  justify-content: center;
+  gap: .5rem;
+  padding: .85rem 1.5rem;
+  font-size: .95rem;
+}
