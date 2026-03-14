@@ -1768,6 +1768,159 @@ function _renderClosedBanner() {
 })();
 
 /* ══════════════════════════════════════════════
+   SPRINT 9A — WHATSAPP MASIVO
+   ══════════════════════════════════════════════ */
+
+var _MASIVO_DEFAULT_TPL = "Hola {nombre} \uD83D\uDC4B, te recuerdo que tienes apartado el n\u00famero *{num}* de la rifa *{rifa}*.\n\nEl valor a pagar es *${precio} COP*.\n\nEscr\u00edbeme para confirmar tu pago. \uD83D\uDE4F";
+
+function _masivoMsg(tpl, buyer) {
+  var cfg = RIFA_CONFIG || {};
+  return tpl
+    .replace(/\{nombre\}/g, buyer.nombre || "participante")
+    .replace(/\{num\}/g,    buyer.num    || "")
+    .replace(/\{precio\}/g, Number(cfg.precio || 0).toLocaleString("es-CO"))
+    .replace(/\{rifa\}/g,   cfg.nombre   || "la rifa");
+}
+
+function _masivoWaUrl(cel, msg) {
+  var clean = String(cel || "").replace(/\D/g, "");
+  if (!clean.startsWith("57")) clean = "57" + clean;
+  return "https://wa.me/" + clean + "?text=" + encodeURIComponent(msg);
+}
+
+function _renderMasivoList() {
+  var list = document.getElementById("masivoList");
+  if (!list) return;
+  var apartados = BUYERS.filter(function(b) { return b.estado === "Apartado"; });
+  var tpl = (document.getElementById("masivoMsgTpl") || {}).value || _MASIVO_DEFAULT_TPL;
+
+  if (!apartados.length) {
+    list.innerHTML = '<p class="masivo-empty">No hay compradores con estado Apartado.</p>';
+    _updateMasivoCount();
+    return;
+  }
+
+  list.innerHTML = apartados.map(function(b, i) {
+    var previewMsg = encodeURIComponent(_masivoMsg(tpl, b));
+    return (
+      '<div class="masivo-row">' +
+        '<label class="masivo-row-check">' +
+          '<input type="checkbox" class="masivo-cb" data-idx="' + i + '" checked />' +
+        '</label>' +
+        '<div class="masivo-row-info">' +
+          '<span class="masivo-num">#' + b.num + '</span>' +
+          '<span class="masivo-nombre">' + (b.nombre || "\u2014") + '</span>' +
+          '<span class="masivo-cel">' + (b.cel || "\u2014") + '</span>' +
+        '</div>' +
+        '<a class="masivo-wa-btn" href="' + _masivoWaUrl(b.cel, _masivoMsg(tpl, b)) + '" target="_blank" rel="noopener">' +
+          '\uD83D\uDCAC Enviar' +
+        '</a>' +
+      '</div>'
+    );
+  }).join("");
+
+  // Attach checkbox change listeners
+  list.querySelectorAll(".masivo-cb").forEach(function(cb) {
+    cb.addEventListener("change", _updateMasivoCount);
+  });
+
+  _updateMasivoCount();
+}
+
+function _updateMasivoCount() {
+  var cbs  = document.querySelectorAll(".masivo-cb");
+  var sel  = Array.from(cbs).filter(function(c) { return c.checked; }).length;
+  var countEl = document.getElementById("masivoCount");
+  if (countEl) countEl.textContent = sel + " seleccionado" + (sel !== 1 ? "s" : "");
+  var allCb = document.getElementById("masivoCheckAll");
+  if (allCb) allCb.checked = sel === cbs.length && cbs.length > 0;
+}
+
+function openMasivoModal() {
+  var apartados = BUYERS.filter(function(b) { return b.estado === "Apartado"; });
+  if (!apartados.length) {
+    showToast("No hay apartados pendientes de cobro", "error");
+    return;
+  }
+  var modal = document.getElementById("masivoModal");
+  if (!modal) return;
+  // Set default template
+  var tplEl = document.getElementById("masivoMsgTpl");
+  if (tplEl && !tplEl.value) tplEl.value = _MASIVO_DEFAULT_TPL;
+  _renderMasivoList();
+  modal.style.display = "flex";
+  document.body.classList.add("modal-open");
+}
+
+function closeMasivoModal() {
+  var modal = document.getElementById("masivoModal");
+  if (modal) modal.style.display = "none";
+  document.body.classList.remove("modal-open");
+}
+
+function enviarMasivo() {
+  var apartados = BUYERS.filter(function(b) { return b.estado === "Apartado"; });
+  var tpl = (document.getElementById("masivoMsgTpl") || {}).value || _MASIVO_DEFAULT_TPL;
+  var cbs = document.querySelectorAll(".masivo-cb");
+  var selected = [];
+  cbs.forEach(function(cb, i) {
+    if (cb.checked && apartados[i]) selected.push(apartados[i]);
+  });
+  if (!selected.length) {
+    showToast("Selecciona al menos un contacto", "error");
+    return;
+  }
+
+  var opened = 0;
+  function openNext() {
+    if (opened >= selected.length) {
+      showToast("\uD83D\uDCAC " + opened + " conversaci\u00f3n" + (opened !== 1 ? "es" : "") + " abiertas en WhatsApp");
+      return;
+    }
+    var b   = selected[opened];
+    var url = _masivoWaUrl(b.cel, _masivoMsg(tpl, b));
+    var win = window.open(url, "_blank");
+    opened++;
+    if (!win) {
+      showToast("\u26A0\uFE0F El navegador bloque\u00f3 los popups. Activa popups o usa los botones individuales.", "error");
+      return;
+    }
+    setTimeout(openNext, 700);
+  }
+  openNext();
+}
+
+// ── Event listeners ───────────────────────────
+(function() {
+  var btnAbrir  = document.getElementById("btnCobrarApartados");
+  var btnCerrar = document.getElementById("closeMasivo");
+  var btnEnviar = document.getElementById("btnEnviarMasivo");
+  var checkAll  = document.getElementById("masivoCheckAll");
+  var tplArea   = document.getElementById("masivoMsgTpl");
+
+  if (btnAbrir)  btnAbrir.addEventListener("click",  openMasivoModal);
+  if (btnCerrar) btnCerrar.addEventListener("click",  closeMasivoModal);
+  if (btnEnviar) btnEnviar.addEventListener("click",  enviarMasivo);
+
+  // Check-all toggle
+  if (checkAll) checkAll.addEventListener("change", function() {
+    document.querySelectorAll(".masivo-cb").forEach(function(cb) {
+      cb.checked = checkAll.checked;
+    });
+    _updateMasivoCount();
+  });
+
+  // Re-render list when template changes
+  if (tplArea) tplArea.addEventListener("input", _renderMasivoList);
+
+  // Close on overlay click
+  var modal = document.getElementById("masivoModal");
+  if (modal) modal.addEventListener("click", function(e) {
+    if (e.target === modal) closeMasivoModal();
+  });
+})();
+
+/* ══════════════════════════════════════════════
    SPRINT 6A — VISTA PÚBLICA COMPARTIBLE
    ══════════════════════════════════════════════ */
 

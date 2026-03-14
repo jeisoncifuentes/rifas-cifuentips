@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Unbounded:wght@700;900&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=8b" />
+    <link rel="stylesheet" href="styles.css?v=9a" />
     <!-- Sprint 6A: CSS crítico de modo compartido (inline para evitar caché) -->
     <style id="share-mode-css">
       .share-mode .sidebar        { display: none !important; }
@@ -575,6 +575,7 @@
               <button class="ghost-btn" id="btnPrintRifa">🖨️ Imprimir</button>
               <button class="ghost-btn" id="btnCopyResumen">📝 Resumen</button>
               <button class="ghost-btn" id="btnCopyGestionar">📋 Copiar link</button>
+              <button class="ghost-btn" id="btnCobrarApartados">📣 Cobrar apartados</button>
               <button class="ghost-btn" id="btnResetDemo" style="color:var(--amber)">🗑️ Limpiar datos</button>
               <button class="primary-btn" id="btnSortearGestionar" style="background:linear-gradient(135deg,#ffd60a,#c9930a);color:#000;font-weight:700;">🎰 Sortear</button>
             </div>
@@ -759,5 +760,36 @@
     </div>
 
     <script src="app.js"></script>
+
+    <!-- ═══════════════ MODAL: COBRAR APARTADOS (Sprint 9A) ═══════════════ -->
+    <div class="modal-overlay" id="masivoModal" role="dialog" aria-modal="true" aria-label="Cobrar apartados por WhatsApp" style="display:none">
+      <div class="modal-box masivo-modal">
+        <button class="modal-close" id="closeMasivo" aria-label="Cerrar">✕</button>
+        <p class="eyebrow-tag">📣 WhatsApp masivo</p>
+        <h3 class="modal-title">Cobrar apartados</h3>
+
+        <!-- Mensaje personalizable -->
+        <label class="masivo-msg-label">Mensaje de cobro</label>
+        <textarea id="masivoMsgTpl" class="masivo-textarea" rows="4"></textarea>
+        <p class="masivo-hint">Usa <code>{nombre}</code>, <code>{num}</code>, <code>{precio}</code> y <code>{rifa}</code> como variables.</p>
+
+        <!-- Controles de selección -->
+        <div class="masivo-toolbar">
+          <label class="masivo-check-all">
+            <input type="checkbox" id="masivoCheckAll" checked />
+            Seleccionar todos
+          </label>
+          <span class="masivo-count" id="masivoCount">0 seleccionados</span>
+          <button class="primary-btn glow-btn" id="btnEnviarMasivo">📤 Enviar seleccionados</button>
+        </div>
+
+        <!-- Lista de apartados -->
+        <div class="masivo-list" id="masivoList">
+          <!-- Generado por JS -->
+        </div>
+
+        <p class="masivo-disclaimer">⚠️ El navegador puede bloquear múltiples popups. Si solo se abre el primero, activa popups para este sitio o usa los botones individuales.</p>
+      </div>
+    </div>
   </body>
 </html>
