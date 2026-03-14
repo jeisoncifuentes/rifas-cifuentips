@@ -14,9 +14,34 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Unbounded:wght@700;900&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=6a" />
+    <!-- Sprint 6A: CSS crítico de modo compartido (inline para evitar caché) -->
+    <style id="share-mode-css">
+      .share-mode .sidebar        { display: none !important; }
+      .share-mode .topbar         { display: none !important; }
+      .share-mode .content        { padding: 3.5rem 0 0 0 !important; }
+      .share-mode .page-shell     { grid-template-columns: 1fr !important; }
+      .share-mode #inicio,
+      .share-mode #panel,
+      .share-mode #crear,
+      .share-mode #gestionar      { display: none !important; }
+      .share-mode #publica        { max-width: 700px; margin: 0 auto; padding: 1rem; }
+      .share-banner               { position:fixed;top:0;left:0;right:0;z-index:200;background:linear-gradient(90deg,#0d1220,#121826);border-bottom:1px solid rgba(255,255,255,.08);padding:.6rem 1.2rem; }
+      .share-banner-inner         { max-width:700px;margin:0 auto;display:flex;align-items:center;gap:.6rem; }
+      .share-banner-title         { flex:1;font-weight:700;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+      .share-banner-back          { font-size:.7rem;color:rgba(255,255,255,.4);text-decoration:none;border:1px solid rgba(255,255,255,.1);border-radius:.4rem;padding:.2rem .5rem; }
+    </style>
   </head>
   <body>
+    <!-- Banner modo público compartido — Sprint 6A -->
+    <div class="share-banner" id="shareBanner" style="display:none">
+      <div class="share-banner-inner">
+        <span class="share-banner-logo">⭐</span>
+        <span class="share-banner-title" id="shareBannerTitle">Rifa</span>
+        <a class="share-banner-back" href="?" title="Ver página completa">↗ Admin</a>
+      </div>
+    </div>
+
     <!-- Partículas de fondo -->
     <div class="bg-particles" aria-hidden="true">
       <span></span><span></span><span></span><span></span>

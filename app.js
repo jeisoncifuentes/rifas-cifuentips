@@ -923,6 +923,11 @@ function initApp() {
   const savedCfg = loadConfig();
   if (savedCfg) Object.assign(RIFA_CONFIG, savedCfg);
 
+  // Sprint 6A: si hay config en la URL (#c=BASE64), usarla (override)
+  if (window._sharedConfig) {
+    Object.assign(RIFA_CONFIG, window._sharedConfig);
+  }
+
   const saved = loadState();
   if (saved?.buyers && saved?.numberStates) {
     BUYERS.length = 0;
@@ -935,6 +940,13 @@ function initApp() {
   updateProgressLegend();
   applyConfig();        // Sprint 3C
   populateCrearForm();  // Sprint 3C
+
+  // Sprint 6A: modo compartido — ir directo a vista pública
+  if (window._shareMode) {
+    switchView("publica");
+    const bannerTitle = document.getElementById("shareBannerTitle");
+    if (bannerTitle) bannerTitle.textContent = RIFA_CONFIG.nombre || "Rifa";
+  }
 }
 // initApp() se llama al final del archivo (después de que Sprint 3C inicializa RIFA_CONFIG)
 
@@ -1290,6 +1302,64 @@ document.getElementById("gestionarTbody")?.addEventListener("dblclick", e => {
     if (ev.key === "Escape") { input.value = current; input.blur(); }
   });
 });
+
+/* ══════════════════════════════════════════════
+   SPRINT 6A — VISTA PÚBLICA COMPARTIBLE
+   ══════════════════════════════════════════════ */
+
+(function _sprint6aInit() {
+  var params  = new URLSearchParams(window.location.search);
+  var hash    = window.location.hash;
+  var isShare = params.get("share") === "1" || params.has("share");
+
+  // Decodificar config desde hash #c=BASE64
+  if (hash.startsWith("#c=")) {
+    try {
+      var b64   = hash.slice(3);
+      var json  = atob(b64);
+      var cfg   = JSON.parse(json);
+      // Se aplica después de que RIFA_CONFIG está declarado
+      window._sharedConfig = cfg;
+    } catch(e) { console.warn("Sprint 6A: config hash inválido", e); }
+  }
+
+  if (!isShare) return;
+
+  // Activar modo público compartido
+  document.body.classList.add("share-mode");
+
+  var banner = document.getElementById("shareBanner");
+  if (banner) banner.style.display = "";
+
+  // Ir directamente a la vista pública al cargar
+  window._shareMode = true;
+})();
+
+function _buildShareUrl() {
+  var base = window.location.href.split("?")[0].split("#")[0];
+  var cfg  = {};
+  var keys = ["nombre","premio","desc","total","precio","fecha","whatsapp","regla","tema","estiloGrid"];
+  keys.forEach(function(k) { if (RIFA_CONFIG[k] !== undefined) cfg[k] = RIFA_CONFIG[k]; });
+  // No incluir imagen (demasiado grande para URL)
+  var b64  = btoa(unescape(encodeURIComponent(JSON.stringify(cfg))));
+  return base + "?share=1#c=" + b64;
+}
+
+function _copyShareUrl() {
+  var url = _buildShareUrl();
+  _copyToClipboard(url, "Link público de la rifa");
+}
+
+// Sobrescribir los botones de copiar link para que usen la URL compartible
+document.getElementById("btnCopyRifaLink") && document.getElementById("btnCopyRifaLink").addEventListener("click", function(e) {
+  e.stopImmediatePropagation();
+  _copyShareUrl();
+}, true);
+
+document.getElementById("btnCopyGestionar") && document.getElementById("btnCopyGestionar").addEventListener("click", function(e) {
+  e.stopImmediatePropagation();
+  _copyShareUrl();
+}, true);
 
 /* ══════════════════════════════════════════════
    SPRINT 5D — FLUJO DE PAGO WHATSAPP
