@@ -1,0 +1,35 @@
+{
+  "name": "Rifas Cifuentips",
+  "short_name": "Rifas",
+  "description": "Crea y gestiona rifas online: vende números, registra compradores y sortea ganadores.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0d1117",
+  "theme_color": "#00b45a",
+  "lang": "es-CO",
+  "categories": ["utilities", "finance"],
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nueva rifa",
+      "short_name": "Nueva",
+      "url": "/?view=crear",
+      "description": "Crear una nueva rifa"
+    },
+    {
+      "name": "Gestionar",
+      "short_name": "Gestionar",
+      "url": "/?view=gestionar",
+      "description": "Gestionar compradores y números"
+    }
+  ]
+}

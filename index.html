@@ -3,6 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- PWA — Sprint 9B -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#00b45a" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Rifas Cifuentips" />
+    <link rel="apple-touch-icon" href="icon.svg" />
     <title>Crear rifas online en Andalucía, Valle | Rifas Cifuentips</title>
     <meta
       name="description"
@@ -14,7 +22,7 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Unbounded:wght@700;900&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=9a" />
+    <link rel="stylesheet" href="styles.css?v=9b" />
     <!-- Sprint 6A: CSS crítico de modo compartido (inline para evitar caché) -->
     <style id="share-mode-css">
       .share-mode .sidebar        { display: none !important; }
@@ -103,6 +111,10 @@
             <span class="rifa-badge-dot">🟢</span>
             <span class="rifa-badge-name" id="activeRifaName">—</span>
           </div>
+          <!-- PWA install button — visible solo cuando la app es instalable -->
+          <button class="pwa-install-btn" id="btnPwaInstall" style="display:none" title="Instalar como app">
+            📲 Instalar app
+          </button>
           <div class="topbar-actions">
             <button class="ghost-btn" data-view-target="publica">Ver demo</button>
             <button class="primary-btn glow-btn" data-view-target="crear">

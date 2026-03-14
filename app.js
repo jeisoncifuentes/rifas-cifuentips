@@ -2172,4 +2172,70 @@ document.getElementById("gridStyleOpts")?.addEventListener("click", e => {
 // ════════════════════════════
 // Arranque final (después de que RIFA_CONFIG está declarado)
 // ════════════════════════════
+/* ══════════════════════════════════════════════
+   SPRINT 9B — PWA / INSTALAR COMO APP
+   ══════════════════════════════════════════════ */
+
+(function() {
+  // ── 1. Registrar Service Worker ──────────────
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function() {
+      navigator.serviceWorker.register("/sw.js")
+        .then(function(reg) {
+          console.log("[SW] Registrado:", reg.scope);
+        })
+        .catch(function(err) {
+          console.warn("[SW] Error al registrar:", err);
+        });
+    });
+  }
+
+  // ── 2. Botón de instalación ───────────────────
+  var _deferredPrompt = null;
+  var btnInstall = document.getElementById("btnPwaInstall");
+
+  window.addEventListener("beforeinstallprompt", function(e) {
+    e.preventDefault();
+    _deferredPrompt = e;
+    if (btnInstall) {
+      btnInstall.style.display = "";
+      btnInstall.addEventListener("click", function() {
+        if (!_deferredPrompt) return;
+        _deferredPrompt.prompt();
+        _deferredPrompt.userChoice.then(function(choice) {
+          if (choice.outcome === "accepted") {
+            showToast("\uD83D\uDE80 App instalada correctamente");
+            btnInstall.style.display = "none";
+          }
+          _deferredPrompt = null;
+        });
+      }, { once: true });
+    }
+  });
+
+  // ── 3. Ocultar botón si ya está instalada ─────
+  window.addEventListener("appinstalled", function() {
+    if (btnInstall) btnInstall.style.display = "none";
+    _deferredPrompt = null;
+    showToast("\u2705 App instalada en tu dispositivo");
+  });
+
+  // ── 4. Detectar si ya corre en modo standalone ─
+  if (window.matchMedia("(display-mode: standalone)").matches
+      || window.navigator.standalone === true) {
+    // Ya está instalada — ocultar botón
+    if (btnInstall) btnInstall.style.display = "none";
+    console.log("[PWA] Corriendo en modo standalone (instalada)");
+  }
+
+  // ── 5. Atajo de URL desde manifest shortcuts ──
+  var urlParams = new URLSearchParams(window.location.search);
+  var viewParam = urlParams.get("view");
+  if (viewParam && ["crear","gestionar","panel","publica"].includes(viewParam)) {
+    window.addEventListener("DOMContentLoaded", function() {
+      if (typeof switchView === "function") switchView(viewParam);
+    });
+  }
+})();
+
 initApp();

@@ -2750,3 +2750,51 @@ td strong { color: var(--text); }
   border-radius: 0 .4rem .4rem 0;
   margin: 0;
 }
+
+
+/* ══════════════════════════════════════════════
+   SPRINT 9B — PWA / INSTALAR COMO APP
+   ══════════════════════════════════════════════ */
+
+/* Botón instalar en topbar */
+.pwa-install-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  background: transparent;
+  border: 1.5px solid var(--green);
+  color: var(--green);
+  border-radius: 2rem;
+  padding: .35rem 1rem;
+  font-size: .78rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, color .15s;
+  animation: pwa-pulse 2.5s ease-in-out infinite;
+}
+.pwa-install-btn:hover {
+  background: var(--green);
+  color: #000;
+  animation: none;
+}
+
+@keyframes pwa-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,180,90,.4); }
+  50%       { box-shadow: 0 0 0 6px rgba(0,180,90,0); }
+}
+
+/* En modo standalone: ocultar botón instalar siempre */
+@media (display-mode: standalone) {
+  .pwa-install-btn { display: none !important; }
+}
+
+/* Ajuste de padding en modo standalone (sin barra del browser) */
+@media (display-mode: standalone) {
+  .topbar {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .sidebar {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
