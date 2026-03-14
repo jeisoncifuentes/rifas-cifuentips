@@ -146,25 +146,174 @@ const DEMO_BUYERS = [
 let BUYERS = DEMO_BUYERS.map(b => ({ ...b })); // array mutable (Sprint 3B)
 
 // ════════════════════════════
-// FEATURE 3: Exportar CSV
-// ════════════════════════════
+/* ══════════════════════════════════════════════
+   SPRINT 8A — EXPORTAR DATOS
+   ══════════════════════════════════════════════ */
+
+// ── Helpers de formato ────────────────────────
+function _csvEscape(v) {
+  var s = String(v == null ? '' : v);
+  if (s.indexOf(',') >= 0 || s.indexOf('"') >= 0) {
+    return '"' + s.split('"').join('""') + '"';
+  }
+  return s;
+}
+
+function _slugName() {
+  var n = (RIFA_CONFIG && RIFA_CONFIG.nombre) || "rifa";
+  return n.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+}
+
+function _fmtMoney(n) {
+  return "$" + Number(n || 0).toLocaleString("es-CO") + " COP";
+}
+
+// ── 1. Exportar CSV mejorado ──────────────────
 function exportCSV() {
-  const headers = ["Número", "Nombre", "Celular", "Estado"];
-  const rows    = BUYERS.map(b => [b.num, b.nombre, b.cel, b.estado]);
-  const csv     = "\uFEFF" + [headers, ...rows].map(r => r.join(",")).join("\r\n");
-  const blob    = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url     = URL.createObjectURL(blob);
-  const link    = Object.assign(document.createElement("a"), {
-    href: url, download: `compradores-${((RIFA_CONFIG||{}).nombre||"rifa").toLowerCase().replace(/\s+/g,"-")}.csv`,
+  var cfg  = RIFA_CONFIG || {};
+  var rows = [];
+  // Cabecera de rifa
+  rows.push(["Rifa", _csvEscape(cfg.nombre || ""), "", "", "", ""]);
+  rows.push(["Premio", _csvEscape(cfg.premio || ""), "", "", "", ""]);
+  rows.push(["Fecha sorteo", _csvEscape(cfg.fecha || ""), "", "", "", ""]);
+  rows.push(["Precio por número", _csvEscape(_fmtMoney(cfg.precio)), "", "", "", ""]);
+  rows.push([]);
+  // Encabezados de columnas
+  rows.push(["#", "Número", "Nombre", "Celular", "Estado", "Ingreso"].map(_csvEscape));
+  // Datos
+  var total = 0;
+  BUYERS.forEach(function(b, i) {
+    var ingreso = b.estado === "Pagado" ? (cfg.precio || 0) : 0;
+    total += ingreso;
+    rows.push([i + 1, b.num, b.nombre, b.cel, b.estado, ingreso > 0 ? _fmtMoney(ingreso) : ""].map(_csvEscape));
   });
+  rows.push([]);
+  rows.push(["", "", "", "", "TOTAL PAGADO", _csvEscape(_fmtMoney(total))]);
+
+  var csv  = "\uFEFF" + rows.map(function(r) { return r.join(","); }).join("\r\n");
+  var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  var url  = URL.createObjectURL(blob);
+  var link = document.createElement("a");
+  link.href = url;
+  link.download = "compradores-" + _slugName() + ".csv";
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
+  showToast("CSV exportado ✓");
 }
 
 document.getElementById("btnExportCSV")
   ?.addEventListener("click", exportCSV);
+
+// Sprint 8A: Imprimir y Resumen
+document.addEventListener("DOMContentLoaded", function() {
+  var btnPrint   = document.getElementById("btnPrintRifa");
+  var btnResumen = document.getElementById("btnCopyResumen");
+  if (btnPrint)   btnPrint.addEventListener("click", printRifa);
+  if (btnResumen) btnResumen.addEventListener("click", copyResumen);
+});
+
+// ── 2. Imprimir vista limpia ──────────────────
+function printRifa() {
+  var cfg  = RIFA_CONFIG || {};
+  var fecha = cfg.fecha
+    ? new Date(cfg.fecha + "T12:00:00").toLocaleDateString("es-CO", {day:"numeric", month:"long", year:"numeric"})
+    : "—";
+  var pagados    = BUYERS.filter(function(b) { return b.estado === "Pagado"; });
+  var apartados  = BUYERS.filter(function(b) { return b.estado === "Apartado"; });
+  var ingresos   = pagados.length * (cfg.precio || 0);
+
+  var rowsPag = pagados.map(function(b) {
+    return "<tr><td>" + b.num + "</td><td>" + (b.nombre||"") + "</td><td>" + (b.cel||"") + "</td><td>Pagado</td><td>" + _fmtMoney(cfg.precio) + "</td></tr>";
+  }).join("");
+  var rowsApt = apartados.map(function(b) {
+    return "<tr><td>" + b.num + "</td><td>" + (b.nombre||"") + "</td><td>" + (b.cel||"") + "</td><td>Apartado</td><td>—</td></tr>";
+  }).join("");
+
+  var html = "<!DOCTYPE html><html lang=\"es\"><head><meta charset=\"UTF-8\"><title>Rifa \"" + (cfg.nombre||"") + "\"</title><style>"
+    + "body{font-family:Arial,sans-serif;padding:24px;color:#111;font-size:13px}"
+    + "h1{font-size:20px;margin:0 0 4px}h2{font-size:14px;font-weight:600;margin:20px 0 6px;border-bottom:1px solid #ccc;padding-bottom:4px}"
+    + ".meta{display:flex;gap:24px;margin:12px 0 20px;flex-wrap:wrap}"
+    + ".meta-item{background:#f5f5f5;padding:8px 14px;border-radius:6px}"
+    + ".meta-item strong{display:block;font-size:11px;color:#666;margin-bottom:2px}"
+    + "table{width:100%;border-collapse:collapse;margin-bottom:16px}"
+    + "th{background:#222;color:#fff;padding:6px 10px;text-align:left;font-size:12px}"
+    + "td{padding:5px 10px;border-bottom:1px solid #eee;font-size:12px}"
+    + "tr:nth-child(even) td{background:#fafafa}"
+    + ".total-row td{font-weight:700;background:#e8f5e9;border-top:2px solid #4caf50}"
+    + "footer{margin-top:24px;font-size:11px;color:#999;text-align:center}"
+    + "@media print{body{padding:0}}"
+    + "</style></head><body>"
+    + "<h1>Rifa: " + (cfg.nombre||"Sin nombre") + "</h1>"
+    + "<div style=\"color:#555;font-size:12px\">" + (cfg.premio ? "Premio: " + cfg.premio : "") + "</div>"
+    + "<div class=\"meta\">"
+    + "<div class=\"meta-item\"><strong>Fecha sorteo</strong>" + fecha + "</div>"
+    + "<div class=\"meta-item\"><strong>Precio por número</strong>" + _fmtMoney(cfg.precio) + "</div>"
+    + "<div class=\"meta-item\"><strong>Total números</strong>" + (cfg.total||100) + "</div>"
+    + "<div class=\"meta-item\"><strong>Pagados</strong>" + pagados.length + "</div>"
+    + "<div class=\"meta-item\"><strong>Apartados</strong>" + apartados.length + "</div>"
+    + "<div class=\"meta-item\"><strong>Ingresos recaudados</strong>" + _fmtMoney(ingresos) + "</div>"
+    + "</div>";
+
+  if (pagados.length) {
+    html += "<h2>Compradores Pagados (" + pagados.length + ")</h2>"
+      + "<table><thead><tr><th>#</th><th>Número</th><th>Nombre</th><th>Celular</th><th>Estado</th><th>Valor</th></tr></thead><tbody>"
+      + rowsPag
+      + "<tr class=\"total-row\"><td colspan=\"5\">Total ingresado</td><td>" + _fmtMoney(ingresos) + "</td></tr>"
+      + "</tbody></table>";
+  }
+  if (apartados.length) {
+    html += "<h2>Por cobrar — Apartados (" + apartados.length + ")</h2>"
+      + "<table><thead><tr><th>#</th><th>Número</th><th>Nombre</th><th>Celular</th><th>Estado</th><th>Valor</th></tr></thead><tbody>"
+      + rowsApt + "</tbody></table>";
+  }
+  html += "<footer>Generado el " + new Date().toLocaleString("es-CO") + " · Rifas Cifuentips</footer>"
+    + "</body></html>";
+
+  var win = window.open("", "_blank", "width=900,height=700");
+  if (!win) { showToast("Activa popups para imprimir", "error"); return; }
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(function() { win.print(); }, 500);
+}
+
+// ── 3. Resumen en texto ───────────────────────
+function copyResumen() {
+  var cfg  = RIFA_CONFIG || {};
+  var fecha = cfg.fecha
+    ? new Date(cfg.fecha + "T12:00:00").toLocaleDateString("es-CO", {day:"numeric", month:"long", year:"numeric"})
+    : "Sin fecha";
+  var pagados   = BUYERS.filter(function(b) { return b.estado === "Pagado"; });
+  var apartados = BUYERS.filter(function(b) { return b.estado === "Apartado"; });
+  var disponibles = (cfg.total || 100) - pagados.length - apartados.length;
+  var ingresos  = pagados.length * (cfg.precio || 0);
+  var nl = String.fromCharCode(10);
+
+  var txt = "🎰 RIFA: " + (cfg.nombre || "Sin nombre") + nl
+    + "🎁 Premio: " + (cfg.premio || "—") + nl
+    + "📅 Sorteo: " + fecha + nl
+    + "💵 Precio por número: " + _fmtMoney(cfg.precio) + nl
+    + nl
+    + "📊 ESTADO:" + nl
+    + "   ✅ Pagados:     " + pagados.length + nl
+    + "   ⏳ Apartados:  " + apartados.length + nl
+    + "   🟢 Disponibles:" + disponibles + nl
+    + "   💰 Recaudado:  " + _fmtMoney(ingresos) + nl;
+
+  if (pagados.length) {
+    txt += nl + "👥 COMPRADORES PAGADOS:" + nl;
+    pagados.forEach(function(b) {
+      txt += "   " + String(b.num).padStart(3," ") + " — " + (b.nombre||"") + " (" + (b.cel||"").slice(-4) + ")" + nl;
+    });
+  }
+
+  _copyToClipboard(txt);
+  showToast("Resumen copiado al portapapeles ✓");
+}
 
 // ════════════════════════════
 // FEATURE 1: Generador de ganador animado
@@ -678,8 +827,19 @@ function _fallbackCopy(text, cb) {
   });
   document.body.appendChild(ta);
   ta.select();
-  try { document.execCommand("copy"); cb(); } catch (_) {}
+  try { document.execCommand("copy"); if (typeof cb === "function") cb(); } catch (_) {}
   document.body.removeChild(ta);
+}
+
+function _copyToClipboard(text, label) {
+  var lbl = label || "Texto";
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text)
+      .then(function() { showToast("📋 " + lbl + " copiado al portapapeles"); })
+      .catch(function() { _fallbackCopy(text, function() { showToast("📋 " + lbl + " copiado"); }); });
+  } else {
+    _fallbackCopy(text, function() { showToast("📋 " + lbl + " copiado"); });
+  }
 }
 
 // Eventos — viral share
@@ -1671,27 +1831,6 @@ function _openWhatsAppTo(number, msg) {
   if (!clean.startsWith("57")) clean = "57" + clean;
   window.open("https://wa.me/" + clean + "?text=" + encodeURIComponent(msg), "_blank");
   _incShareCount();
-}
-
-function _copyToClipboard(text, label) {
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(text)
-      .then(function() { showToast("📋 " + label + " copiado al portapapeles"); })
-      .catch(function() { _fallbackCopy(text, label); });
-  } else {
-    _fallbackCopy(text, label);
-  }
-}
-
-function _fallbackCopy(text, label) {
-  var ta = document.createElement("textarea");
-  ta.value = text;
-  ta.style.cssText = "position:fixed;opacity:0;";
-  document.body.appendChild(ta);
-  ta.focus(); ta.select();
-  try { document.execCommand("copy"); showToast("📋 " + label + " copiado"); }
-  catch(e) { showToast("⚠️ No se pudo copiar", "error"); }
-  document.body.removeChild(ta);
 }
 
 // ── Compartir rifa por WhatsApp ──

@@ -2485,3 +2485,25 @@ td strong { color: var(--text); }
 }
 .new-rifa-btn:hover { opacity: .88; transform: translateY(-1px); }
 .new-rifa-btn:active { transform: translateY(0); }
+
+
+/* ══════════════════════════════════════════════
+   SPRINT 8A — EXPORTAR DATOS
+   ══════════════════════════════════════════════ */
+
+/* Botón imprimir / resumen ya heredan .ghost-btn */
+/* Separador visual entre grupos de botones en toolbar */
+.view-head-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.view-head-actions .btn-sep {
+  width: 1px;
+  height: 22px;
+  background: rgba(255,255,255,.15);
+  flex-shrink: 0;
+}
+
+/* Animación del toast ya existente — nada extra necesario */
