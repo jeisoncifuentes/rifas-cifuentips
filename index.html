@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Unbounded:wght@700;900&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=8a" />
+    <link rel="stylesheet" href="styles.css?v=8b" />
     <!-- Sprint 6A: CSS crítico de modo compartido (inline para evitar caché) -->
     <style id="share-mode-css">
       .share-mode .sidebar        { display: none !important; }
@@ -625,7 +625,20 @@
             </div>
           </div>
 
-          <div class="result-card">
+          <!-- Banner rifa cerrada — oculto por defecto, JS lo muestra -->
+          <div class="closed-banner" id="closedBanner" style="display:none">
+            <div class="closed-banner-inner">
+              <span class="closed-trophy">🏆</span>
+              <div>
+                <p class="closed-banner-label">Rifa cerrada</p>
+                <p class="closed-banner-winner" id="closedBannerWinner">Ganador: —</p>
+                <p class="closed-banner-ref" id="closedBannerRef"></p>
+              </div>
+              <button class="ghost-btn" id="btnReopenRifa" style="margin-left:auto">↩️ Reabrir</button>
+            </div>
+          </div>
+
+          <div class="result-card" id="resultCard">
             <div class="result-icon">🏆</div>
             <div class="result-body">
               <p class="eyebrow-tag">Cierre de rifa</p>
@@ -633,16 +646,16 @@
               <div class="input-row" style="margin-top:16px">
                 <label>
                   Número ganador
-                  <input type="text" value="37" placeholder="Ej: 37" />
+                  <input type="text" id="inputGanadorNum" placeholder="Ej: 37" />
                 </label>
                 <label>
                   Referencia del sorteo
-                  <input type="text" value="Lotería del Valle - premio mayor" />
+                  <input type="text" id="inputGanadorRef" placeholder="Ej: Lotería del Valle - premio mayor" />
                 </label>
               </div>
               <div class="form-actions" style="margin-top:16px;justify-content:flex-start;gap:10px;">
                 <button class="primary-btn large-btn" id="btnSortear" style="background:linear-gradient(135deg,#ffd60a,#c9930a);color:#000;box-shadow:0 4px 20px rgba(255,214,10,0.4);">🎰 Sortear ganador</button>
-                <button class="primary-btn glow-btn large-btn">🎊 Publicar resultado</button>
+                <button class="primary-btn glow-btn large-btn" id="btnPublicarResultado">🎊 Publicar resultado</button>
               </div>
             </div>
           </div>

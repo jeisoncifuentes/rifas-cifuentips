@@ -1,4 +1,4 @@
-/* ══════════════════════════════════════════════
+/*
    RIFAS CIFUENTIPS — app.js
    ══════════════════════════════════════════════ */
 
@@ -1117,6 +1117,7 @@ function initApp() {
   populateCrearForm();  // Sprint 3C
   renderPanelCards();        // Sprint 7A
   _updateActiveRifaBadge(); // Sprint 7A
+  _renderClosedBanner();    // Sprint 8B
 
   // Sprint 6A: modo compartido — ir directo a vista pública
   if (window._shareMode) {
@@ -1606,6 +1607,7 @@ function renderAll7a() {
   populateCrearForm();
   renderPanelCards();
   _updateActiveRifaBadge();
+  _renderClosedBanner();
 }
 
 function _updateActiveRifaBadge() {
@@ -1645,19 +1647,27 @@ function renderPanelCards() {
     var apt    = buyers.filter(function(b) { return b.estado === "Apartado"; }).length;
     var pct    = Math.round((pag / total) * 100);
     var isActive = r.id === activeId;
-    var badge  = isActive ? '<span class="pill-live">Activa</span>' : '<span class="pill-draft">Inactiva</span>';
+    var isClosed = r.estado === "cerrada";
+    var badge  = isClosed
+      ? '<span class="pill-closed">Cerrada</span>'
+      : (isActive ? '<span class="pill-live">Activa</span>' : '<span class="pill-draft">Inactiva</span>');
     var fecha  = c.fecha ? _fmtDateShort(c.fecha) : "Sin fecha";
-    var actBtn = isActive
-      ? '<button class="ghost-btn full" onclick="switchView(\'gestionar\')">Gestionar &rarr;</button>'
-      : '<button class="ghost-btn full" onclick="activateRifa(\'' + r.id + '\')">Activar &rarr;</button>';
+    var actBtn = isClosed
+      ? '<button class="ghost-btn full" onclick="activateRifa(\'' + r.id + '\')">Ver detalle &rarr;</button>'
+      : (isActive
+          ? '<button class="ghost-btn full" onclick="switchView(\'gestionar\')">Gestionar &rarr;</button>'
+          : '<button class="ghost-btn full" onclick="activateRifa(\'' + r.id + '\')">Activar &rarr;</button>');
     var delBtn = '<button class="rifa-del-btn" onclick="deleteRifa(\'' + r.id + '\')" title="Eliminar">&#x1F5D1;</button>';
-    return '<div class="raffle-card' + (isActive ? ' raffle-card-active' : '') + '">'
+    var winnerChip = isClosed
+      ? '<div class="winner-chip">🏆 #' + r.ganador + (r.referencia ? ' · ' + r.referencia : '') + '</div>'
+      : '';
+    return '<div class="raffle-card' + (isActive ? ' raffle-card-active' : '') + (isClosed ? ' raffle-card-closed' : '') + '">'
       + '<div class="raffle-card-top">' + badge + '<span class="raffle-date">' + fecha + '</span>' + delBtn + '</div>'
       + '<h4>' + (c.nombre || "Nueva rifa") + '</h4>'
       + '<p>' + total + ' n\xfameros &middot; $' + Number(c.precio || 0).toLocaleString("es-CO") + ' COP</p>'
       + '<div class="prog-bar"><div class="prog-fill" style="width:' + pct + '%"></div></div>'
       + '<div class="raffle-meta-row"><span>\u2705 ' + pag + ' pagados</span><span>\u23F3 ' + apt + ' apartados</span></div>'
-      + actBtn + '</div>';
+      + winnerChip + actBtn + '</div>';
   }).join("");
 }
 
@@ -1667,6 +1677,94 @@ function renderPanelCards() {
   var _origSaveConfig = saveConfig;
   saveState  = function() { _origSaveState();  saveActiveRifa(); };
   saveConfig = function() { _origSaveConfig(); saveActiveRifa(); };
+})();
+
+/* ══════════════════════════════════════════════
+   SPRINT 8B — CERRAR RIFA / HISTORIAL
+   ══════════════════════════════════════════════ */
+
+// ── Cerrar rifa activa ────────────────────────
+function cerrarRifa() {
+  var num = (document.getElementById("inputGanadorNum") || {}).value || "";
+  var ref = (document.getElementById("inputGanadorRef") || {}).value || "";
+  num = num.trim();
+  if (!num) { showToast("Ingresa el número ganador", "error"); return; }
+  if (!window.confirm("¿Cerrar esta rifa? El estado quedará como Cerrada y se guardará el ganador.")) return;
+
+  var rifas = loadRifas() || [];
+  var id    = getActiveId();
+  var idx   = rifas.findIndex(function(r) { return r.id === id; });
+  if (idx < 0) { showToast("No se encontró la rifa activa", "error"); return; }
+
+  saveActiveRifa();
+  rifas = loadRifas();
+  rifas[idx].estado    = "cerrada";
+  rifas[idx].ganador   = num;
+  rifas[idx].referencia= ref;
+  rifas[idx].closedAt  = new Date().toISOString();
+  saveRifas(rifas);
+
+  _renderClosedBanner();
+  renderPanelCards();
+  showToast("🏆 Rifa cerrada — ganador #" + num);
+}
+
+// ── Reabrir rifa ──────────────────────────────
+function reabrirRifa() {
+  if (!window.confirm("¿Reabrir esta rifa? Se eliminarán el ganador y la fecha de cierre.")) return;
+  var rifas = loadRifas() || [];
+  var id    = getActiveId();
+  var idx   = rifas.findIndex(function(r) { return r.id === id; });
+  if (idx < 0) return;
+  delete rifas[idx].estado;
+  delete rifas[idx].ganador;
+  delete rifas[idx].referencia;
+  delete rifas[idx].closedAt;
+  saveRifas(rifas);
+  _renderClosedBanner();
+  renderPanelCards();
+  showToast("Rifa reabierta");
+}
+
+// ── Mostrar / ocultar banner de cerrada ───────
+function _renderClosedBanner() {
+  var rifas  = loadRifas() || [];
+  var id     = getActiveId();
+  var rifa   = rifas.find(function(r) { return r.id === id; }) || {};
+  var closed = rifa.estado === "cerrada";
+
+  var banner     = document.getElementById("closedBanner");
+  var resultCard = document.getElementById("resultCard");
+  var winnerEl   = document.getElementById("closedBannerWinner");
+  var refEl      = document.getElementById("closedBannerRef");
+
+  if (banner)     banner.style.display     = closed ? "" : "none";
+  if (resultCard) resultCard.style.display = closed ? "none" : "";
+
+  if (closed && winnerEl) {
+    var buyer = (rifa.buyers || []).find(function(b) { return String(b.num) === String(rifa.ganador); });
+    winnerEl.textContent = "🏆 Número " + rifa.ganador
+      + (buyer ? " — " + buyer.nombre : " (sin comprador registrado)");
+  }
+  if (closed && refEl) {
+    refEl.textContent = rifa.referencia ? "📋 " + rifa.referencia : "";
+  }
+
+  // Pre-fill inputs with saved values when not closed
+  if (!closed) {
+    var numIn = document.getElementById("inputGanadorNum");
+    var refIn = document.getElementById("inputGanadorRef");
+    if (numIn && rifa.ganador)    numIn.value = rifa.ganador;
+    if (refIn && rifa.referencia) refIn.value = rifa.referencia;
+  }
+}
+
+// ── Event listeners ───────────────────────────
+(function() {
+  var btnPublicar = document.getElementById("btnPublicarResultado");
+  var btnReopen   = document.getElementById("btnReopenRifa");
+  if (btnPublicar) btnPublicar.addEventListener("click", cerrarRifa);
+  if (btnReopen)   btnReopen.addEventListener("click", reabrirRifa);
 })();
 
 /* ══════════════════════════════════════════════

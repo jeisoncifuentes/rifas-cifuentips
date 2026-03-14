@@ -2507,3 +2507,82 @@ td strong { color: var(--text); }
 }
 
 /* Animación del toast ya existente — nada extra necesario */
+
+
+/* ══════════════════════════════════════════════
+   SPRINT 8B — CERRAR RIFA / HISTORIAL
+   ══════════════════════════════════════════════ */
+
+/* Pill de rifa cerrada */
+.pill-closed {
+  display: inline-block;
+  background: rgba(255,80,80,.12);
+  color: #ff8080;
+  border: 1px solid rgba(255,80,80,.35);
+  border-radius: 1rem;
+  padding: .15rem .55rem;
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+/* Card de rifa cerrada — muted */
+.raffle-card-closed {
+  opacity: .75;
+  border-style: dashed !important;
+}
+.raffle-card-closed:hover {
+  opacity: 1;
+}
+
+/* Chip con el número ganador en la card */
+.winner-chip {
+  background: linear-gradient(135deg, rgba(255,214,10,.15), rgba(255,214,10,.05));
+  border: 1px solid rgba(255,214,10,.4);
+  border-radius: .45rem;
+  padding: .35rem .7rem;
+  font-size: .78rem;
+  color: #ffd60a;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+/* Banner de rifa cerrada en la vista Gestionar */
+.closed-banner {
+  background: linear-gradient(135deg, rgba(255,214,10,.1), rgba(255,100,100,.08));
+  border: 1px solid rgba(255,214,10,.35);
+  border-radius: .75rem;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+}
+.closed-banner-inner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.closed-trophy {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.closed-banner-label {
+  margin: 0 0 .2rem;
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--ink-3);
+  font-weight: 700;
+}
+.closed-banner-winner {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffd60a;
+}
+.closed-banner-ref {
+  margin: .2rem 0 0;
+  font-size: .8rem;
+  color: var(--ink-2);
+}
